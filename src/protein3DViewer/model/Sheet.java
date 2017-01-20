@@ -1,25 +1,35 @@
 package protein3DViewer.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by sophiamersmann on 20/01/2017.
  */
 public class Sheet extends SecondaryStructure {
 
-    List<Strand> strands = new ArrayList<Strand>();
+    Map<Integer, Strand> strands = new HashMap<>();
 
     public Sheet(String id) {
         super(id);
     }
 
-    public List<Strand> getStrands() {
+    public Map<Integer, Strand> getStrands() {
         return strands;
     }
 
-    public void setStrands(List<Strand> strands) {
+    public Strand getStrand(Integer key) {
+        return strands.get(key);
+    }
+
+    public void setStrands(Map<Integer, Strand> strands) {
         this.strands = strands;
+    }
+
+    public void setStrand(Integer key, Strand strand) {
+        strands.put(key, strand);
     }
 
     @Override

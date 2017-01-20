@@ -2,7 +2,9 @@ package protein3DViewer.model;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -16,7 +18,7 @@ public class Protein {
     private String name;
 
     private SeqResRecord seqResRecord;
-    private List<SecondaryStructure> secondaryStructures = new ArrayList<SecondaryStructure>();
+    private Map<String, SecondaryStructure> secondaryStructures = new HashMap<>();
     private Model model;
 
     public Path getPath() {
@@ -51,12 +53,20 @@ public class Protein {
         this.seqResRecord = seqResRecord;
     }
 
-    public List<SecondaryStructure> getSecondaryStructures() {
+    public Map<String, SecondaryStructure> getSecondaryStructures() {
         return secondaryStructures;
     }
 
-    public void setSecondaryStructures(List<SecondaryStructure> secondaryStructures) {
+    public SecondaryStructure getSecondaryStructure(String key) {
+        return secondaryStructures.get(key);
+    }
+
+    public void setSecondaryStructures(Map<String, SecondaryStructure> secondaryStructures) {
         this.secondaryStructures = secondaryStructures;
+    }
+
+    public void setSecondaryStructure(String key, SecondaryStructure secondaryStructure) {
+        secondaryStructures.put(key, secondaryStructure);
     }
 
     public Model getModel() {

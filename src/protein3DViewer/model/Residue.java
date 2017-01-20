@@ -1,6 +1,9 @@
 package protein3DViewer.model;
 
-import java.util.List;
+import protein3DViewer.Tools;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by sophiamersmann on 20/01/2017.
@@ -10,12 +13,11 @@ public class Residue {
     private Integer id;
     private Character name;
     private String name3;
+    private Map<Integer, Atom> atoms = new HashMap<>();
 
-    private List<Atom> atoms;
-
-    public Residue(Integer id, Character name, String name3) {
+    public Residue(Integer id, String name3) {
         this.id = id;
-        this.name = name;
+        this.name = Tools.aminoAcid3to1(name3);
         this.name3 = name3;
     }
 
@@ -43,12 +45,29 @@ public class Residue {
         this.name3 = name3;
     }
 
-    public List<Atom> getAtoms() {
+    public Map<Integer, Atom> getAtoms() {
         return atoms;
     }
 
-    public void setAtoms(List<Atom> atoms) {
+    public Atom getAtom(Integer key) {
+        return atoms.get(key);
+    }
+
+    public Atom getAtom(String name) {
+        for (Atom atom: atoms.values()) {
+            if (atom.getName() == name) {
+                return atom;
+            }
+        }
+        return null;
+    }
+
+    public void setAtoms(Map<Integer, Atom> atoms) {
         this.atoms = atoms;
+    }
+
+    public void setAtom(Integer key, Atom atom) {
+        atoms.put(key, atom);
     }
 
     @Override

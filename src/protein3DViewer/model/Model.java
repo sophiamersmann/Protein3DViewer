@@ -10,8 +10,13 @@ import java.util.Map;
 public class Model {
 
     private Integer id;
-
     private Map<Character, Chain> chains = new HashMap<>();
+
+    public void createBonds() {
+        for (Chain chain: chains.values()) {
+            chain.createBonds();
+        }
+    }
 
     public Model(Integer id) {
         this.id = id;
@@ -29,8 +34,16 @@ public class Model {
         return chains;
     }
 
+    public Chain getChain(Character key) {
+        return chains.get(key);
+    }
+
     public void setChains(Map<Character, Chain> chains) {
         this.chains = chains;
+    }
+
+    public void setChain(Character key, Chain chain) {
+        chains.put(key, chain);
     }
 
     @Override

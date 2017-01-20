@@ -20,7 +20,11 @@ public class Main extends Application {
         Protein protein = new Protein();
         PDBParser parser = new PDBParser(pdbFile);
         new Director(parser, protein);
+        protein.getModel().createBonds();
 
+        System.out.println(protein.getSeqResRecord());
+        System.out.println(protein.getSecondaryStructures());
+        System.out.println(protein.getModel());
         System.exit(0);
 
     }
