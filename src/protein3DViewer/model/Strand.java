@@ -12,6 +12,13 @@ public class Strand {
     private Residue initResidue;
     private Residue endResidue;
 
+    public Boolean hasResidue(Residue residue) {
+        if (residue.getId() >= initResidue.getId() && residue.getId() <= endResidue.getId()) {
+            return true;
+        }
+        return false;
+    }
+
     public Strand(Integer id) {
         this.id = id;
     }

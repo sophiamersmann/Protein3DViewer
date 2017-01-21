@@ -1,19 +1,35 @@
 package protein3DViewer.model;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * Created by sophiamersmann on 20/01/2017.
  */
-public class Sheet extends SecondaryStructure {
+public class Sheet {
 
-    Map<Integer, Strand> strands = new HashMap<>();
+    private String id;
+    private Map<Integer, Strand> strands = new HashMap<>();
+
+    public Boolean hasResidue(Residue residue) {
+        for (Strand strand : strands.values()) {
+            if (strand.hasResidue(residue)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public Sheet(String id) {
-        super(id);
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public Map<Integer, Strand> getStrands() {
@@ -35,7 +51,8 @@ public class Sheet extends SecondaryStructure {
     @Override
     public String toString() {
         return "Sheet{" +
-                "strands=" + strands +
+                "id='" + id + '\'' +
+                ", strands=" + strands +
                 '}';
     }
 }

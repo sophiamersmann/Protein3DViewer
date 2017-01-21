@@ -3,8 +3,9 @@ package protein3DViewer.model;
 /**
  * Created by sophiamersmann on 20/01/2017.
  */
-public class Helix extends SecondaryStructure {
+public class Helix {
 
+    private String id;
     private Character chainName;
     private String type;
 
@@ -12,7 +13,14 @@ public class Helix extends SecondaryStructure {
     private Residue endResidue;
 
     public Helix(String id) {
-        super(id);
+        this.id = id;
+    }
+
+    public boolean hasResidue(Residue residue) {
+        if (residue.getId() >= initResidue.getId() && residue.getId() <= endResidue.getId()) {
+            return true;
+        }
+        return false;
     }
 
     public Character getChainName() {
@@ -47,10 +55,19 @@ public class Helix extends SecondaryStructure {
         this.endResidue = endResidue;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     @Override
     public String toString() {
         return "Helix{" +
-                "chainName=" + chainName +
+                "id='" + id + '\'' +
+                ", chainName=" + chainName +
                 ", type='" + type + '\'' +
                 ", initResidue=" + initResidue +
                 ", endResidue=" + endResidue +

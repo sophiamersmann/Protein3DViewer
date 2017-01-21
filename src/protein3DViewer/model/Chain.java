@@ -1,7 +1,5 @@
 package protein3DViewer.model;
 
-import javafx.collections.transformation.SortedList;
-
 import java.util.*;
 
 /**
@@ -51,7 +49,7 @@ public class Chain {
 
     public void createBonds() {
         // bonds within a residue
-        for (Residue res: residues.values()) {
+        for (Residue res : residues.values()) {
             createBond(res, "N", res, "CA");
             createBond(res, "CA", res, "CB");
             createBond(res, "CA", res, "C");

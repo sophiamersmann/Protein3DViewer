@@ -15,6 +15,11 @@ public class Residue {
     private String name3;
     private Map<Integer, Atom> atoms = new HashMap<>();
 
+    private Boolean isInHelix = false;
+    private Boolean isInSheet = false;
+
+    private Chain chain;
+
     public Residue(Integer id, String name3) {
         this.id = id;
         this.name = Tools.aminoAcid3to1(name3);
@@ -54,7 +59,7 @@ public class Residue {
     }
 
     public Atom getAtom(String name) {
-        for (Atom atom: atoms.values()) {
+        for (Atom atom : atoms.values()) {
             if (atom.getName() == name) {
                 return atom;
             }
@@ -70,6 +75,30 @@ public class Residue {
         atoms.put(key, atom);
     }
 
+    public Chain getChain() {
+        return chain;
+    }
+
+    public void setChain(Chain chain) {
+        this.chain = chain;
+    }
+
+    public Boolean isInHelix() {
+        return isInHelix;
+    }
+
+    public void setInHelix(Boolean inHelix) {
+        isInHelix = inHelix;
+    }
+
+    public Boolean isInSheet() {
+        return isInSheet;
+    }
+
+    public void setInSheet(Boolean inSheet) {
+        isInSheet = inSheet;
+    }
+
     @Override
     public String toString() {
         return "Residue{" +
@@ -77,6 +106,9 @@ public class Residue {
                 ", name=" + name +
                 ", name3='" + name3 + '\'' +
                 ", atoms=" + atoms +
+                ", isInHelix=" + isInHelix +
+                ", isInSheet=" + isInSheet +
+                ", chain=" + chain +
                 '}';
     }
 }

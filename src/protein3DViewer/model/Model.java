@@ -1,7 +1,6 @@
 package protein3DViewer.model;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,7 +12,7 @@ public class Model {
     private Map<Character, Chain> chains = new HashMap<>();
 
     public void createBonds() {
-        for (Chain chain: chains.values()) {
+        for (Chain chain : chains.values()) {
             chain.createBonds();
         }
     }

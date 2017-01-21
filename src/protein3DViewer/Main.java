@@ -1,9 +1,15 @@
 package protein3DViewer;
 
 import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import protein3DViewer.model.Protein;
+import protein3DViewer.presenter.ProteinPresenter;
+import protein3DViewer.view.ProteinView;
 
+import java.awt.*;
 import java.io.File;
 
 public class Main extends Application {
@@ -22,10 +28,16 @@ public class Main extends Application {
         new Director(parser, protein);
         protein.getModel().createBonds();
 
-        System.out.println(protein.getSeqResRecord());
-        System.out.println(protein.getSecondaryStructures());
-        System.out.println(protein.getModel());
-        System.exit(0);
+        GridPane gridPane = new GridPane();
+
+        ProteinView proteinView = new ProteinView(gridPane, protein);
+        ProteinPresenter proteinPresenter = new ProteinPresenter(proteinView, protein);
+        proteinView.getToolBar().prefWidthProperty().bind(primaryStage.widthProperty());
+
+        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+        Scene scene = new Scene(gridPane, screen.getWidth(), screen.getHeight());
+        primaryStage.setScene(scene);
+        primaryStage.show();
 
     }
 }

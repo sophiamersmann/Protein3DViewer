@@ -1,8 +1,6 @@
 package protein3DViewer.model;
 
-
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by sophiamersmann on 19/01/2017.
@@ -19,6 +17,8 @@ public class Atom {
 
     private List<Bond> inBonds;
     private List<Bond> outBonds;
+
+    private Residue residue;
 
     public Atom(Integer id, String name, String element) {
         this.id = id;
@@ -90,6 +90,14 @@ public class Atom {
         this.outBonds = outBonds;
     }
 
+    public Residue getResidue() {
+        return residue;
+    }
+
+    public void setResidue(Residue residue) {
+        this.residue = residue;
+    }
+
     @Override
     public String toString() {
         return "Atom{" +
@@ -99,6 +107,9 @@ public class Atom {
                 ", x=" + x +
                 ", y=" + y +
                 ", z=" + z +
+                ", inBonds=" + inBonds +
+                ", outBonds=" + outBonds +
+                ", residue=" + residue +
                 '}';
     }
 }
