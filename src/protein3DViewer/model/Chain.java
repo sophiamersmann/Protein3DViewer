@@ -9,7 +9,7 @@ public class Chain {
 
     private Character name;
     private Map<Integer, Residue> residues = new HashMap<>();
-    private List<Bond> bonds;
+    private List<Bond> bonds = new ArrayList<>();
 
     public Chain(Character name) {
         this.name = name;

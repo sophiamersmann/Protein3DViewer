@@ -60,7 +60,7 @@ public class Residue {
 
     public Atom getAtom(String name) {
         for (Atom atom : atoms.values()) {
-            if (atom.getName() == name) {
+            if (atom.getName().equals(name)) {
                 return atom;
             }
         }

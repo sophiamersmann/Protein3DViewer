@@ -3,7 +3,6 @@ package protein3DViewer;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import protein3DViewer.model.Protein;
 import protein3DViewer.presenter.ProteinPresenter;

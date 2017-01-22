@@ -6,12 +6,12 @@ import protein3DViewer.model.Atom;
 /**
  * Created by sophiamersmann on 20/01/2017.
  */
-public class AtomViewO extends AtomView {
+public class CarbonView extends AtomView {
 
-    final static Integer RADIUS = 60;
-    final static Color COLOR = Color.RED;
+    final static Integer RADIUS = 70;
+    final static Color COLOR = Color.GREY;
 
-    public AtomViewO(Atom atom) {
+    public CarbonView(Atom atom) {
         super(atom);
         setDefaultRadius(RADIUS);
         setMaterial(COLOR);

@@ -1,5 +1,8 @@
 package protein3DViewer.model;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+
 import java.util.List;
 
 /**
@@ -11,12 +14,9 @@ public class Atom {
     private String name;
     private String element;
 
-    private Double x;
-    private Double y;
-    private Double z;
-
-    private List<Bond> inBonds;
-    private List<Bond> outBonds;
+    private DoubleProperty x = new SimpleDoubleProperty();
+    private DoubleProperty y = new SimpleDoubleProperty();
+    private DoubleProperty z = new SimpleDoubleProperty();
 
     private Residue residue;
 
@@ -50,44 +50,40 @@ public class Atom {
         this.element = element;
     }
 
-    public Double getX() {
+    public double getX() {
+        return x.get();
+    }
+
+    public DoubleProperty xProperty() {
         return x;
     }
 
-    public void setX(Double x) {
-        this.x = x;
+    public void setX(double x) {
+        this.x.set(x);
     }
 
-    public Double getY() {
+    public double getY() {
+        return y.get();
+    }
+
+    public DoubleProperty yProperty() {
         return y;
     }
 
-    public void setY(Double y) {
-        this.y = y;
+    public void setY(double y) {
+        this.y.set(y);
     }
 
-    public Double getZ() {
+    public double getZ() {
+        return z.get();
+    }
+
+    public DoubleProperty zProperty() {
         return z;
     }
 
-    public void setZ(Double z) {
-        this.z = z;
-    }
-
-    public List<Bond> getInBonds() {
-        return inBonds;
-    }
-
-    public void setInBonds(List<Bond> inBonds) {
-        this.inBonds = inBonds;
-    }
-
-    public List<Bond> getOutBonds() {
-        return outBonds;
-    }
-
-    public void setOutBonds(List<Bond> outBonds) {
-        this.outBonds = outBonds;
+    public void setZ(double z) {
+        this.z.set(z);
     }
 
     public Residue getResidue() {
@@ -107,8 +103,6 @@ public class Atom {
                 ", x=" + x +
                 ", y=" + y +
                 ", z=" + z +
-                ", inBonds=" + inBonds +
-                ", outBonds=" + outBonds +
                 ", residue=" + residue +
                 '}';
     }

@@ -31,7 +31,7 @@ public class Bond {
 
     @Override
     public String toString() {
-        return "Bond{" +
+        return "BondView{" +
                 "startAtom=" + startAtom +
                 ", endAtom=" + endAtom +
                 '}';

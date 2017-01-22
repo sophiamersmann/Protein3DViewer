@@ -39,6 +39,7 @@ public class ProteinView {
     private CheckBox showBonds = new CheckBox("Show Bonds");
     private ChoiceBox chooseVisualization = new ChoiceBox(FXCollections.observableArrayList("Sticks", "Ribbon", "Cartoon"));
     private Slider atomSizeSlider = new Slider(-0.8, 0.8, 0);
+    private Slider bondSizeSlider = new Slider(-1, 1, 0);
 
     private int OFFSET = 10;
     private int[] PERC_HEIGHT_OF_ROWS = new int[]{5, 5, 90};
@@ -73,7 +74,7 @@ public class ProteinView {
         showAtoms.setSelected(true);
         showBonds.setSelected(true);
         chooseVisualization.setValue("Sticks");
-        box.getChildren().addAll(showAtoms, showBonds, chooseVisualization, atomSizeSlider);
+        box.getChildren().addAll(showAtoms, showBonds, chooseVisualization, atomSizeSlider, bondSizeSlider);
         box.setAlignment(Pos.CENTER_LEFT);
 
         toolBar.prefWidthProperty().bind(gridPane.prefWidthProperty());
@@ -128,6 +129,10 @@ public class ProteinView {
 
     public Slider getAtomSizeSlider() {
         return atomSizeSlider;
+    }
+
+    public Slider getBondSizeSlider() {
+        return bondSizeSlider;
     }
 
     public MenuItem getOpen() {

@@ -31,12 +31,15 @@ public abstract class AtomView extends Group {
     public AtomView(Atom atom) {
         this.atom = atom;
         shape = new Sphere();
-        x.bind(translateXProperty());
-        y.bind(translateYProperty());
-        z.bind(translateZProperty());
         setTranslateX(atom.getX());
         setTranslateY(atom.getY());
         setTranslateZ(atom.getZ());
+        this.atom.xProperty().bindBidirectional(x);
+        this.atom.yProperty().bindBidirectional(y);
+        this.atom.zProperty().bindBidirectional(z);
+        x.bindBidirectional(translateXProperty());
+        y.bindBidirectional(translateYProperty());
+        z.bindBidirectional(translateZProperty());
         getChildren().add(shape);
     }
 
@@ -70,12 +73,12 @@ public abstract class AtomView extends Group {
     }
 
     private Color getAminoAcidColor() {
-        if (this instanceof AtomViewC) {
-            return AtomViewC.COLOR;
-        } else if (this instanceof AtomViewN) {
-            return AtomViewN.COLOR;
-        } else if (this instanceof AtomViewO) {
-            return AtomViewO.COLOR;
+        if (this instanceof CarbonView) {
+            return CarbonView.COLOR;
+        } else if (this instanceof NitrogenView) {
+            return NitrogenView.COLOR;
+        } else if (this instanceof OxygenView) {
+            return OxygenView.COLOR;
         } else {
             System.err.println("Coloring not successful.");
             System.exit(1);
