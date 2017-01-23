@@ -11,40 +11,26 @@ public class Chain {
     private Map<Integer, Residue> residues = new HashMap<>();
     private List<Bond> bonds = new ArrayList<>();
 
-    public Chain(Character name) {
-        this.name = name;
+    public String generateAminoAcidSequence() {
+        StringBuilder sb = new StringBuilder();
+        for (Residue residue : residues.values()) {
+            sb.append(residue.getName());
+        }
+        return sb.toString();
     }
 
-    public Character getName() {
-        return name;
-    }
-
-    public void setName(Character name) {
-        this.name = name;
-    }
-
-    public Map<Integer, Residue> getResidues() {
-        return residues;
-    }
-
-    public Residue getResidue(Integer key) {
-        return residues.get(key);
-    }
-
-    public void setResidues(Map<Integer, Residue> residues) {
-        this.residues = residues;
-    }
-
-    public void setResidue(Integer key, Residue residue) {
-        residues.put(key, residue);
-    }
-
-    public List<Bond> getBonds() {
-        return bonds;
-    }
-
-    public void setBonds(List<Bond> bonds) {
-        this.bonds = bonds;
+    public String generateSecondaryStructureAnnotations() {
+        StringBuilder sb = new StringBuilder();
+        for (Residue residue : residues.values()) {
+            if (residue.isInHelix()) {
+                sb.append("H");
+            } else if (residue.isInSheet()) {
+                sb.append("E");
+            } else {
+                sb.append(" ");
+            }
+        }
+        return sb.toString();
     }
 
     public void createBonds() {
@@ -71,6 +57,42 @@ public class Chain {
         if (startAtom != null && endAtom != null) {
             bonds.add(new Bond(startAtom, endAtom));
         }
+    }
+
+    public Chain(Character name) {
+        this.name = name;
+    }
+
+    public Character getName() {
+        return name;
+    }
+
+    public void setName(Character name) {
+        this.name = name;
+    }
+
+    public Map<Integer, Residue> getResidues() {
+        return residues;
+    }
+
+    public void setResidues(Map<Integer, Residue> residues) {
+        this.residues = residues;
+    }
+
+    public Residue getResidue(Integer key) {
+        return residues.get(key);
+    }
+
+    public void setResidue(Integer key, Residue residue) {
+        residues.put(key, residue);
+    }
+
+    public List<Bond> getBonds() {
+        return bonds;
+    }
+
+    public void setBonds(List<Bond> bonds) {
+        this.bonds = bonds;
     }
 
     @Override

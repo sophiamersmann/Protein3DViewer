@@ -1,11 +1,18 @@
 package protein3DViewer.view;
 
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import protein3DViewer.model.*;
-import protein3DViewer.presenter.SequencePresenter;
+import javafx.scene.layout.VBox;
+import protein3DViewer.BlastSearchResultParser;
+import protein3DViewer.BlastService;
+import protein3DViewer.model.Chain;
+import protein3DViewer.model.Residue;
+import protein3DViewer.model.SecondaryStructure;
+import protein3DViewer.model.SeqResRecord;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,27 +25,37 @@ public class SequenceView extends Group {
     private SeqResRecord seqResRecord;
     private SecondaryStructure secondaryStructure;
 
+    private BlastService blastService = new BlastService();
+    private String[] blastResult;
+
     private Map<Integer, Label> residueViews = new HashMap<>();
     private Map<Integer, Label> secondaryStructureAnnotations = new HashMap<>();
 
+    private VBox sequenceBox = new VBox();
     private HBox residueViewBox = new HBox(2);
     private HBox secondaryStructureAnnotationBox = new HBox(2);
 
-    public SequenceView(SequencePresenter sequencePresenter, SeqResRecord seqResRecord, SecondaryStructure secondaryStructures) {
+    public SequenceView(SeqResRecord seqResRecord, SecondaryStructure secondaryStructures) {
         this.seqResRecord = seqResRecord;
         this.secondaryStructure = secondaryStructures;
-        initLayout();
+//        startBlastService();
         initResidueViews();
         initSecondaryStructureAnnotation();
-        getChildren().addAll(residueViewBox, secondaryStructureAnnotationBox);
+        sequenceBox.setAlignment(Pos.CENTER_LEFT);
+        sequenceBox.getChildren().addAll(residueViewBox, secondaryStructureAnnotationBox);
+        getChildren().add(sequenceBox);
     }
 
-    private void initLayout() {  // TODO: align Text
-//        secondaryStructureAnnotationBox.setLayoutX(residueViewBox.getLayoutX());
-//        secondaryStructureAnnotationBox.setLayoutY(residueViewBox.getLayoutY() + 15);
-        residueViewBox.setAlignment(Pos.BASELINE_LEFT);
-        secondaryStructureAnnotationBox.setAlignment(Pos.BASELINE_LEFT);
-        secondaryStructureAnnotationBox.setLayoutY(residueViewBox.getLayoutY() + 15);
+    private void startBlastService() {  // TODO: is not happening
+        blastService.setSequence(seqResRecord.generateAminoAcidSequence());
+        blastService.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+            @Override
+            public void handle(WorkerStateEvent t) {
+                blastResult = (String[]) t.getSource().getValue();
+                new BlastSearchResultParser(blastResult);
+            }
+        });
+        blastService.start();
     }
 
     private void initResidueViews() {

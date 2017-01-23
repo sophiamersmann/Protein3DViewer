@@ -1,7 +1,6 @@
 package protein3DViewer.view;
 
 import javafx.scene.Group;
-import protein3DViewer.model.Atom;
 import protein3DViewer.model.Bond;
 
 /**

@@ -12,15 +12,15 @@ public class Helix {
     private Residue initResidue;
     private Residue endResidue;
 
-    public Helix(String id) {
-        this.id = id;
-    }
-
     public boolean hasResidue(Residue residue) {
         if (residue.getId() >= initResidue.getId() && residue.getId() <= endResidue.getId()) {
             return true;
         }
         return false;
+    }
+
+    public Helix(String id) {
+        this.id = id;
     }
 
     public Character getChainName() {

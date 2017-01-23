@@ -3,8 +3,6 @@ package protein3DViewer.model;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 
-import java.util.List;
-
 /**
  * Created by sophiamersmann on 19/01/2017.
  */

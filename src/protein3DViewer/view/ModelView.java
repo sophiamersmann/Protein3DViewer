@@ -2,11 +2,15 @@ package protein3DViewer.view;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.scene.Camera;
 import javafx.scene.Group;
+import javafx.scene.PerspectiveCamera;
+import javafx.scene.SubScene;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
-import protein3DViewer.presenter.ModelPresenter;
 import protein3DViewer.model.*;
 
 import java.util.ArrayList;
@@ -21,6 +25,10 @@ public class ModelView extends Group {
 
     private Model model;
 
+    private StackPane stackPane = new StackPane();
+    private Pane topPane = new Pane();
+    private Pane bottomPane = new Pane();
+
     private Map<Integer, AtomView> atomViews = new HashMap<>();
     private List<BondView> bondViews = new ArrayList<>();
 
@@ -29,20 +37,37 @@ public class ModelView extends Group {
 
     private final Property<Transform> modelTransform = new SimpleObjectProperty<>(new Rotate());
 
-    public ModelView(ModelPresenter modelPresenter, Model model) {
+    public ModelView(Model model) {
         this.model = model;
+        modelTransform.addListener((observable, oldValue, newValue) -> {
+            this.getTransforms().setAll(newValue);
+        }); // TODO: not nice here
+        init3DView();
+        topPane.setPickOnBounds(false);
+        stackPane.getChildren().addAll(bottomPane, topPane);
+        getChildren().addAll(stackPane);
+    }
+
+    private void init3DView() {
+        SubScene subScene = new SubScene(bottomPane, 1000, 1000);  // TODO: hard coded right now
+        Camera camera = new PerspectiveCamera();  // TODO: is that working properly?
+//        camera.setTranslateZ(-100);
+//        camera.setTranslateX(0);
+//        camera.setTranslateY(0);
+//        camera.setNearClip(0.1);
+//        camera.setFarClip(10000);
+//        camera.setFieldOfView(35);
+        subScene.setCamera(camera);
+
         initAtomViews();
         initBondViews();
         showAtomViews();
         showBondViews();
-        modelTransform.addListener((observable, oldValue, newValue) -> {
-            this.getTransforms().setAll(newValue);
-        }); // TODO: not nice here
-        getChildren().addAll(bondViewGroup, atomViewGroup);
+        bottomPane.getChildren().addAll(bondViewGroup, atomViewGroup);
     }
 
     private void initAtomViews() {
-        AtomViewFactory atomViewFactory = new AtomViewFactory();
+        final AtomViewFactory atomViewFactory = new AtomViewFactory();
         for (Chain chain : model.getChains().values()) {
             for (Residue residue : chain.getResidues().values()) {
                 for (Atom atom : residue.getAtoms().values()) {
@@ -53,8 +78,8 @@ public class ModelView extends Group {
     }
 
     private void initBondViews() {
-        for (Chain chain: model.getChains().values()) {
-            for (Bond bond: chain.getBonds()) {
+        for (Chain chain : model.getChains().values()) {
+            for (Bond bond : chain.getBonds()) {
                 bondViews.add(new BondView(bond));
             }
         }
@@ -83,7 +108,7 @@ public class ModelView extends Group {
     }
 
     public void changeBondSize(Double factor) {
-        for (BondView bondView: bondViews) {
+        for (BondView bondView : bondViews) {
             bondView.changeRadius(factor);
         }
     }
@@ -101,5 +126,13 @@ public class ModelView extends Group {
 
     public Property<Transform> modelTransformProperty() {
         return modelTransform;
+    }
+
+    public Pane getBottomPane() {
+        return bottomPane;
+    }
+
+    public StackPane getStackPane() {
+        return stackPane;
     }
 }

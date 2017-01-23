@@ -1,15 +1,14 @@
 package protein3DViewer.view;
 
 import javafx.collections.FXCollections;
-import javafx.geometry.HPos;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.RowConstraints;
+import javafx.scene.layout.BorderPane;
 import protein3DViewer.model.Protein;
-import protein3DViewer.presenter.SequencePresenter;
 import protein3DViewer.presenter.ModelPresenter;
+import protein3DViewer.presenter.SequencePresenter;
 
 /**
  * Created by sophiamersmann on 20/01/2017.
@@ -18,93 +17,116 @@ public class ProteinView {
 
     private Protein protein;
 
-    private GridPane gridPane;
+    private BorderPane borderPane;
 
     private SequenceView sequenceView;
     private ModelView modelView;
 
     private MenuBar menuBar = new MenuBar();
     private Menu menuFile = new Menu("File");
+    private MenuItem open = new MenuItem("Open...");
     private Menu menuEdit = new Menu("Edit");
     private Menu menuView = new Menu("View");
-    private MenuItem open = new MenuItem("Open...");
+    private Menu show = new Menu("Show");
+    private CheckMenuItem showAtomsMenu = new CheckMenuItem("Atoms");
+    private CheckMenuItem showBondsMenu = new CheckMenuItem("Bonds");
+    private Menu visualization = new Menu("Visualization");
+    private CheckMenuItem sticks = new CheckMenuItem("Sticks");
+    private CheckMenuItem ribbon = new CheckMenuItem("Ribbon");
+    private CheckMenuItem cartoon = new CheckMenuItem("Cartoon");
     private Menu colorBy = new Menu("Color by...");
-    private MenuItem colorByAminoAcid = new MenuItem("Amino acid");
-    private MenuItem colorBySecondaryStructure = new MenuItem("Secondary structure");
-    private MenuItem colorByProperties = new MenuItem("Physicochemical Properties");
+    private CheckMenuItem colorByAminoAcid = new CheckMenuItem(AtomView.COLOR_BY_AMINO_ACID);
+    private CheckMenuItem colorBySecondaryStructure = new CheckMenuItem(AtomView.COLOR_BY_SECONDARY_STRUCTURE);
+    private CheckMenuItem colorByProperties = new CheckMenuItem(AtomView.COLOR_BY_PROPERTIES);
+    private Menu atomSizeMenu = new Menu("Atom Size");
+    private MenuItem increaseAtomSize = new MenuItem("Increase");
+    private MenuItem decreaseAtomSize = new MenuItem("Decrease");
+    private Menu bondSizeMenu = new Menu("Bond Size");
+    private MenuItem increaseBondSize = new MenuItem("Increase");
+    private MenuItem decreaseBondSize = new MenuItem("Decrease");
 
     private ToolBar toolBar = new ToolBar();
-    private HBox box = new HBox(10);
     private CheckBox showAtoms = new CheckBox("Show Atoms");
     private CheckBox showBonds = new CheckBox("Show Bonds");
-    private ChoiceBox chooseVisualization = new ChoiceBox(FXCollections.observableArrayList("Sticks", "Ribbon", "Cartoon"));
+    private ChoiceBox<String> chooseVisualization = new ChoiceBox<>(FXCollections.observableArrayList("Sticks", "Ribbon", "Cartoon"));
     private Slider atomSizeSlider = new Slider(-0.8, 0.8, 0);
     private Slider bondSizeSlider = new Slider(-1, 1, 0);
+    private ChoiceBox<String> chooseColoring = new ChoiceBox<>(FXCollections.observableArrayList(
+            AtomView.COLOR_BY_AMINO_ACID, AtomView.COLOR_BY_SECONDARY_STRUCTURE, AtomView.COLOR_BY_PROPERTIES));
 
-    private int OFFSET = 10;
-    private int[] PERC_HEIGHT_OF_ROWS = new int[]{5, 5, 90};
-
-    public ProteinView(GridPane gridPane, Protein protein) {
+    public ProteinView(BorderPane borderPane, Protein protein) {
         this.protein = protein;
-        this.gridPane = gridPane;
-        initLayout();
-        createMenuBar();
-        createToolBar();
+        this.borderPane = borderPane;
         initViews();
+        initMenuBar();
+        initToolBar();
     }
 
-    private void initLayout() {
-        for (int percHeight : PERC_HEIGHT_OF_ROWS) {
-            RowConstraints rowConstraints = new RowConstraints();
-            rowConstraints.setPercentHeight(percHeight);
-            gridPane.getRowConstraints().add(rowConstraints);
-        }
-    }
-
-    private void createMenuBar() {
+    private void initMenuBar() {
         menuFile.getItems().add(open);
-        menuView.getItems().add(colorBy);
+        showAtomsMenu.setSelected(true);
+        showBondsMenu.setSelected(true);
+        show.getItems().addAll(showAtomsMenu, showBondsMenu);
+        sticks.setSelected(true);
+        visualization.getItems().addAll(sticks, ribbon, cartoon);
+        atomSizeMenu.getItems().addAll(increaseAtomSize, decreaseAtomSize);
+        bondSizeMenu.getItems().addAll(increaseBondSize, decreaseBondSize);
+        menuView.getItems().addAll(show, visualization, colorBy, atomSizeMenu, bondSizeMenu);
+        colorByAminoAcid.setSelected(true);
         colorBy.getItems().addAll(colorByAminoAcid, colorBySecondaryStructure, colorByProperties);
         menuBar.getMenus().addAll(menuFile, menuEdit, menuView);
         menuBar.useSystemMenuBarProperty().set(true);
-        gridPane.getChildren().add(menuBar);
+        borderPane.getChildren().add(menuBar);
     }
 
-    private void createToolBar() {
+    private void initToolBar() {
         showAtoms.setSelected(true);
         showBonds.setSelected(true);
         chooseVisualization.setValue("Sticks");
-        box.getChildren().addAll(showAtoms, showBonds, chooseVisualization, atomSizeSlider, bondSizeSlider);
-        box.setAlignment(Pos.CENTER_LEFT);
+        chooseColoring.setValue("Amino Acids");
 
-        toolBar.prefWidthProperty().bind(gridPane.prefWidthProperty());
-        toolBar.getItems().add(box);
-        GridPane.setConstraints(toolBar, 0, 0);
-        gridPane.getChildren().add(toolBar);
+        toolBar.setOrientation(Orientation.VERTICAL);
+        toolBar.setPrefWidth(10);  // TODO: hard coded right now
+        toolBar.setMaxWidth(10);
+        toolBar.getItems().addAll(
+                showAtoms,
+                atomSizeSlider,
+                new Separator(),
+                showBonds,
+                bondSizeSlider,
+                new Separator(),
+                new Label("Visualization"),
+                chooseVisualization,
+                new Separator(),
+                new Label("Color by..."),
+                chooseColoring
+        );
+
+        borderPane.setLeft(toolBar);
+        BorderPane.setMargin(borderPane.getLeft(), new Insets(0, 10, 10, 0));
+        BorderPane.setAlignment(borderPane.getLeft(), Pos.TOP_CENTER);
     }
 
     private void initViews() {
-        SequencePresenter sequencePresenter = new SequencePresenter();
-        sequenceView = new SequenceView(sequencePresenter, protein.getSeqResRecord(), protein.getSecondaryStructure());
-        GridPane.setConstraints(sequenceView, 0, 1);
-        GridPane.setHalignment(sequenceView, HPos.CENTER);
+        modelView = new ModelView(protein.getModel());
+        new ModelPresenter(modelView, protein.getModel());
+        borderPane.setCenter(modelView);
+//        BorderPane.setMargin(borderPane.getCenter(), new Insets(5));
+        BorderPane.setAlignment(borderPane.getCenter(), Pos.CENTER);
 
-        ModelPresenter modelPresenter = new ModelPresenter();
-        modelView = new ModelView(modelPresenter, protein.getModel());
-        GridPane.setConstraints(modelView, 0, 2);
-        GridPane.setHalignment(modelView, HPos.CENTER);
-
-        gridPane.getChildren().addAll(sequenceView, modelView);
-
-
+        sequenceView = new SequenceView(protein.getSeqResRecord(), protein.getSecondaryStructure());
+        new SequencePresenter(sequenceView);
+        borderPane.setTop(sequenceView);
+        BorderPane.setMargin(borderPane.getTop(), new Insets(10, 0, 10, 0));
+        BorderPane.setAlignment(borderPane.getTop(), Pos.CENTER);
     }
 
     public ToolBar getToolBar() {
         return toolBar;
     }
 
-    public GridPane getGridPane() {
-        return gridPane;
+    public BorderPane getBorderPane() {
+        return borderPane;
     }
 
     public SequenceView getSequenceView() {
@@ -139,15 +161,51 @@ public class ProteinView {
         return open;
     }
 
-    public MenuItem getColorByAminoAcid() {
+    public CheckMenuItem getColorByAminoAcid() {
         return colorByAminoAcid;
     }
 
-    public MenuItem getColorBySecondaryStructure() {
+    public CheckMenuItem getColorBySecondaryStructure() {
         return colorBySecondaryStructure;
     }
 
-    public MenuItem getColorByProperties() {
+    public CheckMenuItem getColorByProperties() {
         return colorByProperties;
+    }
+
+    public CheckMenuItem getShowAtomsMenu() {
+        return showAtomsMenu;
+    }
+
+    public CheckMenuItem getShowBondsMenu() {
+        return showBondsMenu;
+    }
+
+    public MenuItem getIncreaseAtomSize() {
+        return increaseAtomSize;
+    }
+
+    public MenuItem getDecreaseAtomSize() {
+        return decreaseAtomSize;
+    }
+
+    public MenuItem getIncreaseBondSize() {
+        return increaseBondSize;
+    }
+
+    public MenuItem getDecreaseBondSize() {
+        return decreaseBondSize;
+    }
+
+    public Menu getAtomSizeMenu() {
+        return atomSizeMenu;
+    }
+
+    public Menu getBondSizeMenu() {
+        return bondSizeMenu;
+    }
+
+    public ChoiceBox<String> getChooseColoring() {
+        return chooseColoring;
     }
 }

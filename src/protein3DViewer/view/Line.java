@@ -43,7 +43,7 @@ public class Line extends Cylinder {
         Point3D startPoint = new Point3D(startX.get(), startY.get(), startZ.get());
         Point3D endPoint = new Point3D(endX.get(), endY.get(), endZ.get());
 
-        Point3D yAxis = new Point3D(0,1,0);
+        Point3D yAxis = new Point3D(0, 1, 0);
         Point3D direction = endPoint.subtract(startPoint);
 
         Point3D midPoint = endPoint.midpoint(startPoint);

@@ -26,6 +26,15 @@ public class Residue {
         this.name3 = name3;
     }
 
+    public Atom getAtom(String name) {
+        for (Atom atom : atoms.values()) {
+            if (atom.getName().equals(name)) {
+                return atom;
+            }
+        }
+        return null;
+    }
+
     public Integer getId() {
         return id;
     }
@@ -56,15 +65,6 @@ public class Residue {
 
     public Atom getAtom(Integer key) {
         return atoms.get(key);
-    }
-
-    public Atom getAtom(String name) {
-        for (Atom atom : atoms.values()) {
-            if (atom.getName().equals(name)) {
-                return atom;
-            }
-        }
-        return null;
     }
 
     public void setAtoms(Map<Integer, Atom> atoms) {

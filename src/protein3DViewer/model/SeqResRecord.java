@@ -10,6 +10,22 @@ public class SeqResRecord {
 
     private Map<Character, Chain> chains = new HashMap<>();
 
+    public String generateAminoAcidSequence() {
+        StringBuilder sb = new StringBuilder();
+        for (Chain chain : chains.values()) {
+            sb.append(chain.generateAminoAcidSequence());
+        }
+        return sb.toString();
+    }
+
+    public String generateSecondaryStructureAnnotations() {
+        StringBuilder sb = new StringBuilder();
+        for (Chain chain : chains.values()) {
+            sb.append(chain.generateSecondaryStructureAnnotations());
+        }
+        return sb.toString();
+    }
+
     public Map<Character, Chain> getChains() {
         return chains;
     }

@@ -13,9 +13,9 @@ import protein3DViewer.model.Atom;
  */
 public abstract class AtomView extends Group {
 
-    public final static String COLOR_BY_AMINO_ACID = "amino acid";
-    public final static String COLOR_BY_SECONDARY_STRUCTURE = "secondary structure";
-    public final static String COLOR_BY_PROPERTIES = "physicochemical properties";
+    public final static String COLOR_BY_AMINO_ACID = "Amino Acids";
+    public final static String COLOR_BY_SECONDARY_STRUCTURE = "Secondary Structure";
+    public final static String COLOR_BY_PROPERTIES = "Physicochemical Properties";
 
     public final static Color DEFAULT_COLOR = Color.GREY;
     public final static Color HELIX_COLOR = Color.GREEN;
