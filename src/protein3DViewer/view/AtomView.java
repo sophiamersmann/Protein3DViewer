@@ -13,6 +13,7 @@ import protein3DViewer.model.Atom;
  */
 public abstract class AtomView extends Group {
 
+    public final static String COLOR_BY_SINGLE_COLOR = "Single Color";
     public final static String COLOR_BY_AMINO_ACID = "Amino Acids";
     public final static String COLOR_BY_SECONDARY_STRUCTURE = "Secondary Structure";
     public final static String COLOR_BY_PROPERTIES = "Physicochemical Properties";
@@ -59,7 +60,9 @@ public abstract class AtomView extends Group {
     }
 
     public Color getColor(String mode) {
-        if (mode.equals(COLOR_BY_AMINO_ACID)) {
+        if (mode.equals(COLOR_BY_SINGLE_COLOR)) {
+            return DEFAULT_COLOR;
+        } else if (mode.equals(COLOR_BY_AMINO_ACID)) {
             return getAminoAcidColor();
         } else if (mode.equals(COLOR_BY_SECONDARY_STRUCTURE)) {
             return getSecondaryStructureColor();
@@ -100,6 +103,41 @@ public abstract class AtomView extends Group {
         return null; // TODO: implement
     }
 
+    public double getX() {
+        return x.get();
+    }
+
+    public DoubleProperty xProperty() {
+        return x;
+    }
+
+    public void setX(double x) {
+        this.x.set(x);
+    }
+
+    public double getY() {
+        return y.get();
+    }
+
+    public DoubleProperty yProperty() {
+        return y;
+    }
+
+    public void setY(double y) {
+        this.y.set(y);
+    }
+
+    public double getZ() {
+        return z.get();
+    }
+
+    public DoubleProperty zProperty() {
+        return z;
+    }
+
+    public void setZ(double z) {
+        this.z.set(z);
+    }
 
     @Override
     public String toString() {

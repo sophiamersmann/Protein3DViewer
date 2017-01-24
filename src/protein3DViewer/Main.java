@@ -23,6 +23,10 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+//        FileChooser fileChooser = new FileChooser();
+//        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("PDB files (*.pdb)", "*.pdb");
+//        fileChooser.getExtensionFilters().add(extFilter);
+//        File pdbFile = fileChooser.showOpenDialog(primaryStage);
         String pdbFilename = "/Users/sophiamersmann/Dropbox/Uni_Tuebingen/studies/MSc/semester_1_ws1617/advanced_java_for_bioinformatics/project/1ey4.pdb";
         File pdbFile = new File(pdbFilename);
 

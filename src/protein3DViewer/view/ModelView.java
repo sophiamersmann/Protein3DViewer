@@ -2,20 +2,14 @@ package protein3DViewer.view;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.scene.Camera;
 import javafx.scene.Group;
-import javafx.scene.PerspectiveCamera;
-import javafx.scene.SubScene;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
-import protein3DViewer.model.*;
+import protein3DViewer.model.Model;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,95 +23,58 @@ public class ModelView extends Group {
     private Pane topPane = new Pane();
     private Pane bottomPane = new Pane();
 
-    private Map<Integer, AtomView> atomViews = new HashMap<>();
-    private List<BondView> bondViews = new ArrayList<>();
-
-    private Group atomViewGroup = new Group();
-    private Group bondViewGroup = new Group();
-
     private final Property<Transform> modelTransform = new SimpleObjectProperty<>(new Rotate());
+
+    private Map<String, ModelVisualization> modelVisualizations = new HashMap<>();
+
+    private final static String INITIAL_VISUALIZATION_MODE = "Sticks";
 
     public ModelView(Model model) {
         this.model = model;
-        modelTransform.addListener((observable, oldValue, newValue) -> {
-            this.getTransforms().setAll(newValue);
-        }); // TODO: not nice here
-        init3DView();
+        initModelTransformListener();
         topPane.setPickOnBounds(false);
+        modelVisualizations.put(INITIAL_VISUALIZATION_MODE, ModelVisualizationFactory.createModelVisualization(model, INITIAL_VISUALIZATION_MODE));
+        bottomPane.getChildren().addAll(modelVisualizations.get(INITIAL_VISUALIZATION_MODE).bottomChildren);
+        topPane.getChildren().addAll(modelVisualizations.get(INITIAL_VISUALIZATION_MODE).topChildren);
         stackPane.getChildren().addAll(bottomPane, topPane);
         getChildren().addAll(stackPane);
     }
 
-    private void init3DView() {
-        SubScene subScene = new SubScene(bottomPane, 1000, 1000);  // TODO: hard coded right now
-        Camera camera = new PerspectiveCamera();  // TODO: is that working properly?
-//        camera.setTranslateZ(-100);
-//        camera.setTranslateX(0);
-//        camera.setTranslateY(0);
-//        camera.setNearClip(0.1);
-//        camera.setFarClip(10000);
-//        camera.setFieldOfView(35);
-        subScene.setCamera(camera);
-
-        initAtomViews();
-        initBondViews();
-        showAtomViews();
-        showBondViews();
-        bottomPane.getChildren().addAll(bondViewGroup, atomViewGroup);
+    private void initModelTransformListener() {
+        modelTransform.addListener((observable, oldValue, newValue) -> {
+            this.getTransforms().setAll(newValue);
+        });
     }
 
-    private void initAtomViews() {
-        final AtomViewFactory atomViewFactory = new AtomViewFactory();
-        for (Chain chain : model.getChains().values()) {
-            for (Residue residue : chain.getResidues().values()) {
-                for (Atom atom : residue.getAtoms().values()) {
-                    atomViews.put(atom.getId(), atomViewFactory.createAtomView(atom));
-                }
-            }
+    public void addVisualization(String visualizationMode) {
+        modelVisualizations.put(visualizationMode, ModelVisualizationFactory.createModelVisualization(model, visualizationMode));
+        bottomPane.getChildren().addAll(modelVisualizations.get(visualizationMode).bottomChildren);
+        topPane.getChildren().addAll(modelVisualizations.get(visualizationMode).topChildren);
+    }
+
+    public void removeVisualization(String visualizationMode) {
+        modelVisualizations.remove(visualizationMode);
+        bottomPane.getChildren().clear();
+        topPane.getChildren().clear();
+        for (String key : modelVisualizations.keySet()) {
+            addVisualization(key);
         }
     }
 
-    private void initBondViews() {
-        for (Chain chain : model.getChains().values()) {
-            for (Bond bond : chain.getBonds()) {
-                bondViews.add(new BondView(bond));
-            }
-        }
+    public Model getModel() {
+        return model;
     }
 
-    public void showAtomViews() {
-        atomViewGroup.getChildren().addAll(atomViews.values());
+    public StackPane getStackPane() {
+        return stackPane;
     }
 
-    public void hideAtomViews() {
-        atomViewGroup.getChildren().clear();
+    public Pane getTopPane() {
+        return topPane;
     }
 
-    public void showBondViews() {
-        bondViewGroup.getChildren().addAll(bondViews);
-    }
-
-    public void hideBondViews() {
-        bondViewGroup.getChildren().clear();
-    }
-
-    public void changeAtomSize(Double factor) {
-        for (AtomView atomView : atomViews.values()) {
-            atomView.changeRadius(factor);
-        }
-    }
-
-    public void changeBondSize(Double factor) {
-        for (BondView bondView : bondViews) {
-            bondView.changeRadius(factor);
-        }
-    }
-
-    public void changeAtomColor(String mode) {
-        for (AtomView atomView : atomViews.values()) {
-            Color color = atomView.getColor(mode);  // TODO getColor static?
-            atomView.setMaterial(color);
-        }
+    public Pane getBottomPane() {
+        return bottomPane;
     }
 
     public Transform getModelTransform() {
@@ -128,11 +85,11 @@ public class ModelView extends Group {
         return modelTransform;
     }
 
-    public Pane getBottomPane() {
-        return bottomPane;
+    public Map<String, ModelVisualization> getModelVisualizations() {
+        return modelVisualizations;
     }
 
-    public StackPane getStackPane() {
-        return stackPane;
+    public ModelVisualization getModelVisualization(String key) {
+        return modelVisualizations.get(key);
     }
 }

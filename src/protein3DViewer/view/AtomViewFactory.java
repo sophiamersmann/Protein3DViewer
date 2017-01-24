@@ -7,7 +7,7 @@ import protein3DViewer.model.Atom;
  */
 public class AtomViewFactory {
 
-    public AtomView createAtomView(Atom atom) {
+    public static AtomView createAtomView(Atom atom) {
         if (atom.getName().equals("N")) {
             return new NitrogenView(atom);
         } else if (atom.getName().equals("O")) {

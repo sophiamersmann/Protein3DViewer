@@ -8,6 +8,7 @@ import javafx.stage.FileChooser;
 import protein3DViewer.model.Protein;
 import protein3DViewer.view.AtomView;
 import protein3DViewer.view.ProteinView;
+import protein3DViewer.view.SticksVisualization;
 
 import java.io.File;
 
@@ -28,7 +29,7 @@ public class ProteinPresenter {
 
     private void setUpMenuBar() {
 
-        proteinView.getOpen().setOnAction(new EventHandler<ActionEvent>() {
+        proteinView.getMenuOpen().setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 event.consume();
@@ -36,71 +37,120 @@ public class ProteinPresenter {
                 FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("PDB files (*.pdb)", "*.pdb");
                 fileChooser.getExtensionFilters().add(extFilter);
                 File file = fileChooser.showOpenDialog(proteinView.getModelView().getScene().getWindow());
+//                Main.launch(null);
                 // TODO load new file (open new window or clear protein?)
             }
         });
 
-        proteinView.getColorByAminoAcid().setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                event.consume();
-                handleColorByAminoAcid();
-            }
-        });
-
-        proteinView.getColorBySecondaryStructure().setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                event.consume();
-                handleColorBySecondaryStructure();
-            }
-        });
-
-        proteinView.getShowAtomsMenu().selectedProperty().addListener(new ChangeListener<Boolean>() {
+        proteinView.getMenuShowAtoms().selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                handleShowAtoms(oldValue, newValue);
+                proteinView.getAtomSizeSlider().setDisable(!newValue);
+                if (proteinView.getVisualizeSticks().isSelected()) {
+                    handleShowAtoms(newValue);
+                }
             }
         });
 
-        proteinView.getShowBondsMenu().selectedProperty().addListener(new ChangeListener<Boolean>() {
+        proteinView.getMenuIncreaseAtomSize().setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                event.consume();
+                if (proteinView.getVisualizeSticks().isSelected()) {
+                    handleChangeAtomSize(0.1);
+                }
+            }
+        });
+
+        proteinView.getMenuDecreaseAtomSize().setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                event.consume();
+                if (proteinView.getVisualizeSticks().isSelected()) {
+                    handleChangeAtomSize(-0.1);
+                }
+            }
+        });
+
+        proteinView.getMenuShowBonds().selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                handleShowBonds(oldValue, newValue);
+                if (proteinView.getVisualizeSticks().isSelected()) {
+                    handleShowBonds(newValue);
+                }
             }
         });
 
-        proteinView.getIncreaseAtomSize().setOnAction(new EventHandler<ActionEvent>() {
+        proteinView.getMenuIncreaseBondSize().setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 event.consume();
-                handleChangeAtomSize(0.1);
+                if (proteinView.getVisualizeSticks().isSelected()) {
+                    handleChangeBondSize(0.1);
+                }
             }
         });
 
-        proteinView.getDecreaseAtomSize().setOnAction(new EventHandler<ActionEvent>() {
+        proteinView.getMenuDecreaseBondSize().setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 event.consume();
-                handleChangeAtomSize(-0.1);
+                if (proteinView.getVisualizeSticks().isSelected()) {
+                    handleChangeBondSize(-0.1);
+                }
             }
         });
 
-        proteinView.getIncreaseBondSize().setOnAction(new EventHandler<ActionEvent>() {
+        proteinView.getMenuVisualizeSticks().selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
-            public void handle(ActionEvent event) {
-                event.consume();
-                handleChangeBondSize(0.1);
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                proteinView.getMenuShow().setDisable(!newValue);
+                proteinView.getShowAtoms().setDisable(!newValue); // TODO join with next method
+                proteinView.getAtomSizeSlider().setDisable(!newValue);
+                proteinView.getShowBonds().setDisable(!newValue);
+                proteinView.getBondSizeSlider().setDisable(!newValue);
             }
         });
 
-        proteinView.getDecreaseBondSize().setOnAction(new EventHandler<ActionEvent>() {
+        proteinView.getMenuColorBySingleColor().selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
-            public void handle(ActionEvent event) {
-                event.consume();
-                handleChangeBondSize(-0.1);
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (newValue) {
+                    proteinView.getChooseColoring().setValue(AtomView.COLOR_BY_SINGLE_COLOR);
+                    handleColorBySingleColor();
+                }
             }
         });
+
+        proteinView.getMenuColorByAminoAcid().selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (newValue) {
+                    proteinView.getChooseColoring().setValue(AtomView.COLOR_BY_AMINO_ACID);
+                    handleColorByAminoAcid();
+                }
+            }
+        });
+
+        proteinView.getMenuColorBySecondaryStructure().selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (newValue) {
+                    proteinView.getChooseColoring().setValue(AtomView.COLOR_BY_SECONDARY_STRUCTURE);
+                    handleColorBySecondaryStructure();
+                }
+            }
+        });
+
+        proteinView.getMenuColorByProperties().selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (newValue) {
+                    proteinView.getChooseColoring().setValue(AtomView.COLOR_BY_PROPERTIES);
+                }
+            }
+        });
+
     }
 
     private void setUpToolBar() {
@@ -108,14 +158,10 @@ public class ProteinPresenter {
         proteinView.getShowAtoms().selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                handleShowAtoms(oldValue, newValue);
-            }
-        });
-
-        proteinView.getShowBonds().selectedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                handleShowBonds(oldValue, newValue);
+                proteinView.getAtomSizeSlider().setDisable(!newValue);
+                if (proteinView.getVisualizeSticks().isSelected()) {
+                    handleShowAtoms(newValue);
+                }
             }
         });
 
@@ -123,20 +169,67 @@ public class ProteinPresenter {
         proteinView.getAtomSizeSlider().valueProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                handleChangeAtomSize((Double) newValue - (Double) oldValue);
+                if (proteinView.getVisualizeSticks().isSelected()) {
+                    handleChangeAtomSize((Double) newValue - (Double) oldValue);
+                }
+            }
+        });
+
+        proteinView.getShowBonds().selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                proteinView.getBondSizeSlider().setDisable(!newValue);
+                if (proteinView.getVisualizeSticks().isSelected()) {
+                    handleShowBonds(newValue);
+                }
             }
         });
 
         proteinView.getBondSizeSlider().valueProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                handleChangeBondSize((Double) newValue - (Double) oldValue);
+                if (proteinView.getVisualizeSticks().isSelected()) {
+                    handleChangeBondSize((Double) newValue - (Double) oldValue);
+                }
+            }
+        });
+
+        proteinView.getVisualizeSticks().selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                proteinView.getShowAtoms().setDisable(!newValue);
+                proteinView.getAtomSizeSlider().setDisable(!newValue);
+                proteinView.getShowBonds().setDisable(!newValue);
+                proteinView.getBondSizeSlider().setDisable(!newValue);
+                if (newValue) {
+                    proteinView.getModelView().addVisualization("Sticks");
+                } else {
+                    proteinView.getModelView().removeVisualization("Sticks");
+                }
+            }
+        });
+
+        proteinView.getVisualizeRibbon().selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (newValue) {
+                    proteinView.getModelView().addVisualization("Ribbon");
+                } else {
+                    proteinView.getModelView().removeVisualization("Ribbon");
+                }
             }
         });
 
         proteinView.getChooseColoring().valueProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                proteinView.getMenuColorBySingleColor().setSelected(newValue.equals(AtomView.COLOR_BY_SINGLE_COLOR));
+                proteinView.getMenuColorByAminoAcid().setSelected(newValue.equals(AtomView.COLOR_BY_AMINO_ACID));
+                proteinView.getMenuColorBySecondaryStructure().setSelected(newValue.equals(AtomView.COLOR_BY_SECONDARY_STRUCTURE));
+                proteinView.getMenuColorByProperties().setSelected(newValue.equals(AtomView.COLOR_BY_PROPERTIES));
+                if (newValue.equals(AtomView.COLOR_BY_SINGLE_COLOR)) {
+                    handleColorBySingleColor();
+                }
                 if (newValue.equals(AtomView.COLOR_BY_AMINO_ACID)) {
                     handleColorByAminoAcid();
                 } else if (newValue.equals(AtomView.COLOR_BY_SECONDARY_STRUCTURE)) {
@@ -149,46 +242,53 @@ public class ProteinPresenter {
 
     }
 
-    private void handleShowBonds(Boolean oldValue, Boolean newValue) {
-        proteinView.getBondSizeSlider().setDisable(!newValue);
-        proteinView.getBondSizeMenu().setDisable(!newValue);
+    private void handleShowAtoms(Boolean newValue) {
+        SticksVisualization sticksVisualization = (SticksVisualization) proteinView.getModelView().getModelVisualization("Sticks");
         if (newValue) {
-            proteinView.getModelView().showBondViews();
+            sticksVisualization.showAtomViews();
         } else {
-            proteinView.getModelView().hideBondViews();
-        }
-    }
-
-    private void handleShowAtoms(Boolean oldValue, Boolean newValue) {
-        proteinView.getAtomSizeSlider().setDisable(!newValue);
-        proteinView.getAtomSizeMenu().setDisable(!newValue);
-        if (newValue) {
-            proteinView.getModelView().showAtomViews();
-        } else {
-            proteinView.getModelView().hideAtomViews();
+            sticksVisualization.hideAtomViews();
         }
     }
 
     private void handleChangeAtomSize(Double factor) {
-        proteinView.getModelView().changeAtomSize(factor);
+        SticksVisualization sticksVisualization = (SticksVisualization) proteinView.getModelView().getModelVisualization("Sticks");
+        sticksVisualization.changeAtomSize(factor);
+    }
+
+    private void handleShowBonds(Boolean newValue) {
+        SticksVisualization sticksVisualization = (SticksVisualization) proteinView.getModelView().getModelVisualization("Sticks");
+        if (newValue) {
+            sticksVisualization.showBondViews();
+        } else {
+            sticksVisualization.hideBondViews();
+        }
     }
 
     private void handleChangeBondSize(Double factor) {
-        proteinView.getModelView().changeBondSize(factor);
+        SticksVisualization sticksVisualization = (SticksVisualization) proteinView.getModelView().getModelVisualization("Sticks");
+        sticksVisualization.changeBondSize(factor);
+    }
+
+    private void handleColorBySingleColor() {
+        if (proteinView.getVisualizeSticks().isSelected()) {  // TODO: right now only for sticks available
+            SticksVisualization sticksVisualization = (SticksVisualization) proteinView.getModelView().getModelVisualization("Sticks");
+            sticksVisualization.changeAtomColor(AtomView.COLOR_BY_SINGLE_COLOR);
+        }
     }
 
     private void handleColorByAminoAcid() {
-        proteinView.getColorByAminoAcid().setSelected(true);
-        proteinView.getColorBySecondaryStructure().setSelected(false);
-        proteinView.getColorByProperties().setSelected(false);
-        proteinView.getModelView().changeAtomColor(AtomView.COLOR_BY_AMINO_ACID);
+        if (proteinView.getVisualizeSticks().isSelected()) {  // TODO: right now only for sticks available
+            SticksVisualization sticksVisualization = (SticksVisualization) proteinView.getModelView().getModelVisualization("Sticks");
+            sticksVisualization.changeAtomColor(AtomView.COLOR_BY_AMINO_ACID);
+        }
     }
 
     private void handleColorBySecondaryStructure() {
-        proteinView.getColorBySecondaryStructure().setSelected(true);
-        proteinView.getColorByAminoAcid().setSelected(false);
-        proteinView.getColorByProperties().setSelected(false);
-        proteinView.getModelView().changeAtomColor(AtomView.COLOR_BY_SECONDARY_STRUCTURE);
+        if (proteinView.getVisualizeSticks().isSelected()) {  // TODO: right now only for sticks available
+            SticksVisualization sticksVisualization = (SticksVisualization) proteinView.getModelView().getModelVisualization("Sticks");
+            sticksVisualization.changeAtomColor(AtomView.COLOR_BY_SECONDARY_STRUCTURE);
+        }
     }
 
 }
