@@ -9,7 +9,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 public class Atom {
 
     private Integer id;
-    private String name;
+    private AtomName name;
     private String element;
 
     private DoubleProperty x = new SimpleDoubleProperty();
@@ -20,7 +20,7 @@ public class Atom {
 
     public Atom(Integer id, String name, String element) {
         this.id = id;
-        this.name = name;
+        this.name = AtomName.enumOf(name);
         this.element = element;
     }
 
@@ -32,11 +32,11 @@ public class Atom {
         this.id = id;
     }
 
-    public String getName() {
+    public AtomName getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(AtomName name) {
         this.name = name;
     }
 

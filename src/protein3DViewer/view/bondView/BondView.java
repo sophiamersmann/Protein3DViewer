@@ -1,4 +1,4 @@
-package protein3DViewer.view;
+package protein3DViewer.view.bondView;
 
 import javafx.scene.Group;
 import protein3DViewer.model.Bond;

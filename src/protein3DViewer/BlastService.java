@@ -14,7 +14,7 @@ public class BlastService extends Service<String[]> {
         return new Task<String[]>() {
             protected String[] call() throws InterruptedException {
                 final RemoteBlastClient remoteBlastClient = new RemoteBlastClient();
-                remoteBlastClient.setProgram(RemoteBlastClient.BlastProgram.blastx).setDatabase("nr");
+                remoteBlastClient.setProgram(RemoteBlastClient.BlastProgram.blastp).setDatabase("nr");
 
                 remoteBlastClient.startRemoteSearch(sequence);
 

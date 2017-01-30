@@ -12,6 +12,12 @@ public class Strand {
     private Residue initResidue;
     private Residue endResidue;
 
+    /**
+     * tells if a given residue lies within the strand
+     *
+     * @param residue
+     * @return true, if the given residue is part of the strand
+     */
     public Boolean hasResidue(Residue residue) {
         if (residue.getId() >= initResidue.getId() && residue.getId() <= endResidue.getId()) {
             return true;

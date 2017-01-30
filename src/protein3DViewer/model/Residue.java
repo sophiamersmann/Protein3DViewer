@@ -26,9 +26,16 @@ public class Residue {
         this.name3 = name3;
     }
 
-    public Atom getAtom(String name) {
+    /**
+     * shortcut of getting a specific atom of the residue,
+     * given the name of the atom
+     *
+     * @param atomName name of the atom to be returned
+     * @return atom with the given name
+     */
+    public Atom getAtom(AtomName atomName) {
         for (Atom atom : atoms.values()) {
-            if (atom.getName().equals(name)) {
+            if (atom.getName() == atomName) {
                 return atom;
             }
         }

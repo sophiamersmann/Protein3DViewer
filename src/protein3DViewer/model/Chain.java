@@ -11,6 +11,11 @@ public class Chain {
     private Map<Integer, Residue> residues = new HashMap<>();
     private List<Bond> bonds = new ArrayList<>();
 
+    /**
+     * generate amino acid sequence of this chain
+     *
+     * @return amino acid sequence in one letter code
+     */
     public String generateAminoAcidSequence() {
         StringBuilder sb = new StringBuilder();
         for (Residue residue : residues.values()) {
@@ -19,27 +24,39 @@ public class Chain {
         return sb.toString();
     }
 
-    public String generateSecondaryStructureAnnotations() {
+    /**
+     * generates string of annotations for each residue in chain
+     * according to its participation in a secondary structure element
+     *
+     * @param helixAnnotation annotation for helix residues
+     * @param sheetAnnotation annotation for sheet residues
+     * @param otherAnnotation annotation for the rest of residues
+     * @return annotation string
+     */
+    public String generateSecondaryStructureAnnotations(String helixAnnotation, String sheetAnnotation, String otherAnnotation) {
         StringBuilder sb = new StringBuilder();
         for (Residue residue : residues.values()) {
             if (residue.isInHelix()) {
-                sb.append("H");
+                sb.append(helixAnnotation);
             } else if (residue.isInSheet()) {
-                sb.append("E");
+                sb.append(sheetAnnotation);
             } else {
-                sb.append(" ");
+                sb.append(otherAnnotation);
             }
         }
         return sb.toString();
     }
 
+    /**
+     * create all bonds of the protein backbone
+     */
     public void createBonds() {
         // bonds within a residue
         for (Residue res : residues.values()) {
-            createBond(res, "N", res, "CA");
-            createBond(res, "CA", res, "CB");
-            createBond(res, "CA", res, "C");
-            createBond(res, "C", res, "O");
+            createBond(res, AtomName.NITROGEN, res, AtomName.CARBON_ALPHA);
+            createBond(res, AtomName.CARBON_ALPHA, res, AtomName.CARBON_BETA);
+            createBond(res, AtomName.CARBON_ALPHA, res, AtomName.CARBON);
+            createBond(res, AtomName.CARBON, res, AtomName.OXYGEN);
         }
         // bonds between neighbouring residues
         List<Integer> residueIDs = new ArrayList<>(residues.keySet());
@@ -47,13 +64,21 @@ public class Chain {
         for (int i = 0; i < residueIDs.size() - 1; i++) {
             Residue startResidue = residues.get(residueIDs.get(i));
             Residue endResidue = residues.get(residueIDs.get(i + 1));
-            createBond(startResidue, "C", endResidue, "N");
+            createBond(startResidue, AtomName.CARBON, endResidue, AtomName.NITROGEN);
         }
     }
 
-    private void createBond(Residue startResidue, String startAtomName, Residue endResidue, String endAtomName) {
-        Atom startAtom = startResidue.getAtom(startAtomName);
-        Atom endAtom = endResidue.getAtom(endAtomName);
+    /**
+     * create bond between two atoms
+     *
+     * @param startResidue residue of the first atom
+     * @param startAtomName name of the first atom
+     * @param endResidue residue of the second atom
+     * @param endAtomName name of the second atom
+     */
+    private void createBond(Residue startResidue, AtomName start, Residue endResidue, AtomName end) {
+        Atom startAtom = startResidue.getAtom(start);
+        Atom endAtom = endResidue.getAtom(end);
         if (startAtom != null && endAtom != null) {
             bonds.add(new Bond(startAtom, endAtom));
         }

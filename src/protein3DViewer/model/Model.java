@@ -8,13 +8,26 @@ import java.util.Map;
  */
 public class Model {
 
+    private Protein protein;
+
     private Integer id;
     private Map<Character, Chain> chains = new HashMap<>();
 
+    /**
+     * create bonds of the protein backbone for each chain
+     */
     public void createBonds() {
         for (Chain chain : chains.values()) {
             chain.createBonds();
         }
+    }
+
+    public Protein getProtein() {
+        return protein;
+    }
+
+    public void setProtein(Protein protein) {
+        this.protein = protein;
     }
 
     public Model(Integer id) {

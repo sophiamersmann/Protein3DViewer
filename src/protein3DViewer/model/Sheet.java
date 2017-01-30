@@ -11,6 +11,12 @@ public class Sheet {
     private String id;
     private Map<Integer, Strand> strands = new HashMap<>();
 
+    /**
+     * tells if a given residue lies within the helix
+     *
+     * @param residue
+     * @return true, if the given residue is part of the sheet
+     */
     public Boolean hasResidue(Residue residue) {
         for (Strand strand : strands.values()) {
             if (strand.hasResidue(residue)) {

@@ -1,4 +1,4 @@
-package protein3DViewer.view;
+package protein3DViewer.view.atomView;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -7,20 +7,23 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
 import protein3DViewer.model.Atom;
+import protein3DViewer.view.ColorMode;
 
 /**
  * Created by sophiamersmann on 20/01/2017.
  */
-public abstract class AtomView extends Group {
-
-    public final static String COLOR_BY_SINGLE_COLOR = "Single Color";
-    public final static String COLOR_BY_AMINO_ACID = "Amino Acids";
-    public final static String COLOR_BY_SECONDARY_STRUCTURE = "Secondary Structure";
-    public final static String COLOR_BY_PROPERTIES = "Physicochemical Properties";
+public abstract class AbstractAtomView extends Group {
 
     public final static Color DEFAULT_COLOR = Color.GREY;
+
     public final static Color HELIX_COLOR = Color.GREEN;
     public final static Color SHEET_COLOR = Color.YELLOW;
+
+    public final static Color SMALL_HYDROPHOBIC_COLOR = Color.SALMON;
+    public final static Color LARGE_HYDROPHOBIC_COLOR = Color.LIGHTBLUE;
+    public final static Color POLAR_COLOR = Color.PALEGREEN;
+    public final static Color POS_CHARGED_COLOR = Color.ORANGERED;
+    public final static Color NEG_CHARGED_COLOR = Color.NAVAJOWHITE;
 
     Atom atom;
     Sphere shape;
@@ -29,7 +32,7 @@ public abstract class AtomView extends Group {
     DoubleProperty y = new SimpleDoubleProperty();
     DoubleProperty z = new SimpleDoubleProperty();
 
-    public AtomView(Atom atom) {
+    public AbstractAtomView(Atom atom) {
         this.atom = atom;
         shape = new Sphere();
         setTranslateX(atom.getX());
@@ -59,20 +62,14 @@ public abstract class AtomView extends Group {
         shape.setRadius(shape.getRadius() + factor);
     }
 
-    public Color getColor(String mode) {
-        if (mode.equals(COLOR_BY_SINGLE_COLOR)) {
-            return DEFAULT_COLOR;
-        } else if (mode.equals(COLOR_BY_AMINO_ACID)) {
-            return getAminoAcidColor();
-        } else if (mode.equals(COLOR_BY_SECONDARY_STRUCTURE)) {
-            return getSecondaryStructureColor();
-        } else if (mode.equals(COLOR_BY_PROPERTIES)) {
-            return getPropertyColor();
-        } else {
-            System.err.println(mode + " not implemented.");
-            System.exit(1);
+    public Color getColor(ColorMode mode) {
+        switch (mode) {
+            case UNICOLOR: return DEFAULT_COLOR;
+            case BY_ATOM_TYPE: return getAminoAcidColor();
+            case BY_SECONDARY_STRUCTURE: return getSecondaryStructureColor();
+            case BY_PROPERTIES: return getPropertyColor();
+            default: return DEFAULT_COLOR;
         }
-        return null;
     }
 
     private Color getAminoAcidColor() {
@@ -83,9 +80,7 @@ public abstract class AtomView extends Group {
         } else if (this instanceof OxygenView) {
             return OxygenView.COLOR;
         } else {
-            System.err.println("Coloring not successful.");
-            System.exit(1);
-            return null;
+            return DEFAULT_COLOR;
         }
     }
 
@@ -100,7 +95,14 @@ public abstract class AtomView extends Group {
     }
 
     private Color getPropertyColor() {
-        return null; // TODO: implement
+        switch (AminoAcidGroup.aminoAcidGroupOf(atom.getResidue().getName())) {
+            case SMALL_HYDROPHOBIC: return SMALL_HYDROPHOBIC_COLOR;
+            case LARGE_HYDROPHOBIC: return LARGE_HYDROPHOBIC_COLOR;
+            case POLAR: return POLAR_COLOR;
+            case POS_CHARGED: return POS_CHARGED_COLOR;
+            case NEG_CHARGED: return NEG_CHARGED_COLOR;
+            default: return DEFAULT_COLOR;
+        }
     }
 
     public double getX() {
@@ -141,7 +143,7 @@ public abstract class AtomView extends Group {
 
     @Override
     public String toString() {
-        return "AtomView{" +
+        return "AbstractAtomView{" +
                 "atom=" + atom +
                 ", shape=" + shape +
                 ", x=" + x +

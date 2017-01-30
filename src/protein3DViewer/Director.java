@@ -17,6 +17,7 @@ public class Director {
         protein.setName(p.title);
 
         Model model = new Model(1);
+        model.setProtein(protein);
         for (Integer atomID : p.atomNames.keySet()) {
             Character chainID = p.atomChainNames.get(atomID);
             if (!model.getChains().containsKey(chainID)) {
@@ -39,6 +40,7 @@ public class Director {
         protein.setModel(model);
 
         SeqResRecord seqResRecord = new SeqResRecord();
+        seqResRecord.setProtein(protein);
         for (Map.Entry<Character, List<String>> entry : p.seqResRecord.entrySet()) {
             Chain seqResChain = new Chain(entry.getKey());
             Chain modelChain = protein.getModel().getChain(entry.getKey());
@@ -50,7 +52,9 @@ public class Director {
         }
         protein.setSeqResRecord(seqResRecord);
 
-        protein.setSecondaryStructure(new SecondaryStructure());
+        SecondaryStructure secondaryStructure = new SecondaryStructure();
+        secondaryStructure.setProtein(protein);
+        protein.setSecondaryStructure(secondaryStructure);
         for (String helixId : p.helixChainNames.keySet()) {
             Helix helix = new Helix(helixId);
             helix.setChainName(p.helixChainNames.get(helixId));

@@ -9,8 +9,18 @@ import java.util.Map;
  */
 public class SecondaryStructure {
 
+    private Protein protein;
+
     private Map<String, Helix> helices = new HashMap<>();
     private Map<String, Sheet> sheets = new HashMap<>();
+
+    public Protein getProtein() {
+        return protein;
+    }
+
+    public void setProtein(Protein protein) {
+        this.protein = protein;
+    }
 
     public Map<String, Helix> getHelices() {
         return helices;

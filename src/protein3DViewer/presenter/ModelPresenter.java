@@ -42,6 +42,8 @@ public class ModelPresenter {
                 double scaledY = modelView.getScaleY() * scaleFactor;
                 double scaledZ = modelView.getScaleZ() * scaleFactor;
 
+//                modelView.getCamera().setTranslateZ(event.getDeltaY());
+
                 Scale scale = new Scale(scaledX, scaledY, scaledZ);
                 modelView.modelTransformProperty().setValue(scale.createConcatenation(modelView.getModelTransform()));
             }

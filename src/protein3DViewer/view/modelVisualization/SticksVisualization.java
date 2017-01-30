@@ -1,8 +1,12 @@
-package protein3DViewer.view;
+package protein3DViewer.view.modelVisualization;
 
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import protein3DViewer.model.*;
+import protein3DViewer.view.ColorMode;
+import protein3DViewer.view.bondView.BondView;
+import protein3DViewer.view.atomView.AbstractAtomView;
+import protein3DViewer.view.atomView.AtomViewFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,9 +16,9 @@ import java.util.Map;
 /**
  * Created by sophiamersmann on 23/01/2017.
  */
-public class SticksVisualization extends ModelVisualization {
+public class SticksVisualization extends AbstractModelVisualization {
 
-    private Map<Integer, AtomView> atomViews;
+    private Map<Integer, AbstractAtomView> atomViews;
     private List<BondView> bondViews;
 
     private Group atomViewGroup;
@@ -25,19 +29,18 @@ public class SticksVisualization extends ModelVisualization {
     }
 
     @Override
-    void createBottomChildren() {
+    void createBottomGroup() {
         atomViewGroup = new Group();
         bondViewGroup = new Group();
         initAtomViews();
         initBondViews();
         showAtomViews();
         showBondViews();
-        bottomChildren.add(bondViewGroup);
-        bottomChildren.add(atomViewGroup);
+        bottomGroup.getChildren().addAll(bondViewGroup, atomViewGroup);
     }
 
     @Override
-    void createTopChildren() {
+    void createTopGroup() {
     }
 
     private void initAtomViews() {
@@ -77,7 +80,7 @@ public class SticksVisualization extends ModelVisualization {
     }
 
     public void changeAtomSize(Double factor) {
-        for (AtomView atomView : atomViews.values()) {
+        for (AbstractAtomView atomView : atomViews.values()) {
             atomView.changeRadius(factor);
         }
     }
@@ -88,9 +91,9 @@ public class SticksVisualization extends ModelVisualization {
         }
     }
 
-    public void changeAtomColor(String mode) {
-        for (AtomView atomView : atomViews.values()) {
-            Color color = atomView.getColor(mode);  // TODO getColor static?
+    public void changeAtomColor(ColorMode colorMode) {
+        for (AbstractAtomView atomView : atomViews.values()) {
+            Color color = atomView.getColor(colorMode);  // TODO getColor static?
             atomView.setMaterial(color);
         }
     }

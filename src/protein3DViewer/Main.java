@@ -35,17 +35,6 @@ public class Main extends Application {
         new Director(parser, protein);
         protein.getModel().createBonds();
 
-        BlastService blastService = new BlastService();
-        blastService.setSequence(protein.getSeqResRecord().generateAminoAcidSequence());
-        blastService.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-            @Override
-            public void handle(WorkerStateEvent t) {
-                blastResult = (String[]) t.getSource().getValue();
-                new BlastSearchResultParser(blastResult);
-            }
-        });
-        blastService.start();
-
         BorderPane borderPane = new BorderPane();
         ProteinView proteinView = new ProteinView(borderPane, protein);
         new ProteinPresenter(proteinView, protein);

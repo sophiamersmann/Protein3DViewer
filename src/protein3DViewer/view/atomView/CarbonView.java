@@ -1,4 +1,4 @@
-package protein3DViewer.view;
+package protein3DViewer.view.atomView;
 
 import javafx.scene.paint.Color;
 import protein3DViewer.model.Atom;
@@ -6,12 +6,12 @@ import protein3DViewer.model.Atom;
 /**
  * Created by sophiamersmann on 20/01/2017.
  */
-public class OxygenView extends AtomView {
+public class CarbonView extends AbstractAtomView {
 
-    final static Integer RADIUS = 60;
-    final static Color COLOR = Color.RED;
+    final static Integer RADIUS = 70;
+    final static Color COLOR = Color.GREY;
 
-    public OxygenView(Atom atom) {
+    public CarbonView(Atom atom) {
         super(atom);
         setDefaultRadius(RADIUS);
         setMaterial(COLOR);

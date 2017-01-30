@@ -1,4 +1,4 @@
-package protein3DViewer.view;
+package protein3DViewer.view.bondView;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;

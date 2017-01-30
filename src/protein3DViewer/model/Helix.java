@@ -12,6 +12,12 @@ public class Helix {
     private Residue initResidue;
     private Residue endResidue;
 
+    /**
+     * tells if a given residue lies within the helix
+     *
+     * @param residue
+     * @return true, if the given residue lies within the helix
+     */
     public boolean hasResidue(Residue residue) {
         if (residue.getId() >= initResidue.getId() && residue.getId() <= endResidue.getId()) {
             return true;
