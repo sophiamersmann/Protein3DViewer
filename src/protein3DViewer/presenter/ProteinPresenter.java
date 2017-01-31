@@ -6,6 +6,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.HPos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.chart.PieChart;
@@ -26,7 +27,9 @@ import protein3DViewer.view.atomView.AbstractAtomView;
 import protein3DViewer.view.ProteinView;
 import protein3DViewer.view.modelVisualization.SticksVisualization;
 
+import javax.swing.*;
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.Optional;
 
 /**
@@ -48,28 +51,26 @@ public class ProteinPresenter {
         this.sequencePresenter = proteinView.getSequencePresenter();
         setUpMenuBar();
         setUpToolBar();
-        setUpPieChart();
+//        setUpPieChart();
     }
 
-    private void setUpPieChart() {  // TODO not working
-        final Label caption = new Label();
-        caption.setTextFill(Color.DARKORANGE);
-        caption.setStyle("-fx-font: 24 arial;");
-//        Group root = (Group) proteinView.getBorderPane().getScene().getRoot();
-//        root.getChildren().add(caption);
-
-        for (PieChart.Data data : proteinView.getPieChart().getData()) {
-            data.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent e) {
-                    caption.setTranslateX(e.getSceneX());
-                    caption.setTranslateY(e.getSceneY());
-                    caption.setText(String.valueOf(data.getPieValue()) + "%");
-                }
-            });
-        }
-
-    }
+//    private void setUpPieChart() {  // TODO not working
+//        final Label caption = new Label();
+//        caption.setTextFill(Color.DARKORANGE);
+//        caption.setStyle("-fx-font: 24 arial;");
+//
+//        for (PieChart.Data data : proteinView.getPieChart().getData()) {
+//            data.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
+//                @Override
+//                public void handle(MouseEvent e) {
+//                    caption.setTranslateX(e.getSceneX());
+//                    caption.setTranslateY(e.getSceneY());
+//                    caption.setText(String.valueOf(data.getPieValue()) + "%");
+//                }
+//            });
+//        }
+//
+//    }
 
     private void setUpMenuBar() {
 
@@ -204,6 +205,7 @@ public class ProteinPresenter {
         proteinView.getMenuShowBlastResults().setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                event.consume();
                 final Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("BLAST Results");
                 String firstAlignmentId = blastFirstAlignment.split(" ")[0].substring(1);
@@ -218,6 +220,49 @@ public class ProteinPresenter {
                 GridPane content = new GridPane();
                 content.setMaxWidth(Double.MAX_VALUE);
                 content.add(textArea, 0, 1);
+                alert.getDialogPane().setExpandableContent(content);
+                alert.showAndWait();
+            }
+        });
+
+        proteinView.getMenuStatistics().setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                event.consume();
+                final Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Statistics");
+                PieChart.Data maxData = proteinView.getPieChart().getData().get(0);
+                for (PieChart.Data pieChartData: proteinView.getPieChart().getData()) {
+                    if (pieChartData.getPieValue() > maxData.getPieValue()) {
+                        maxData = pieChartData;
+                    }
+                }
+                DecimalFormat df = new DecimalFormat("#.##");
+                alert.setHeaderText("Most occurring amino acid: " + maxData.getName() + " (" + df.format(maxData.getPieValue()) + "%)");
+                GridPane content = new GridPane();
+
+
+                final Label caption = new Label();
+                caption.setTextFill(Color.DARKORANGE);
+                caption.setStyle("-fx-font: 24 arial;");
+
+                content.add(proteinView.getPieChart(), 0, 0);
+                content.add(caption, 0, 1);
+                GridPane.setHalignment(caption, HPos.CENTER);
+                for (PieChart.Data data : proteinView.getPieChart().getData()) {
+                    data.getNode().addEventHandler(MouseEvent.MOUSE_ENTERED, new EventHandler<MouseEvent>() {
+                        @Override
+                        public void handle(MouseEvent e) {
+                            caption.setText(data.getName() + ": " + df.format(data.getPieValue()) + "%");
+                        }
+                    });
+                    data.getNode().addEventHandler(MouseEvent.MOUSE_EXITED, new EventHandler<MouseEvent>() {
+                        @Override
+                        public void handle(MouseEvent event) {
+                            caption.setText("");
+                        }
+                    });
+                }
                 alert.getDialogPane().setExpandableContent(content);
                 alert.showAndWait();
             }

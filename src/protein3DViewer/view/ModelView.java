@@ -132,6 +132,9 @@ public class ModelView extends Group {
 
     public void removeVisualization(VisualizationMode visualizationMode) {
         modelVisualizations.get(visualizationMode).getBottomGroup().getChildren().clear();
+        if (visualizationMode == VisualizationMode.STICKS) {
+            topPane.getChildren().clear();
+        }
     }
 
     public Model getModel() {

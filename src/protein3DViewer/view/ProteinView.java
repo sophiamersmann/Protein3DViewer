@@ -38,7 +38,9 @@ public class ProteinView {
     private MenuBar menuBar = new MenuBar();
     private Menu menuFile = new Menu("File");
     private MenuItem menuOpen = new MenuItem("Open...");
+
     private Menu menuEdit = new Menu("Edit");
+
     private Menu menuView = new Menu("View");
     private Menu menuShow = new Menu("Show");
     private CheckMenuItem menuShowAtoms = new CheckMenuItem("Atoms");
@@ -58,6 +60,9 @@ public class ProteinView {
     private Menu menuBondSize = new Menu("Bond Size");
     private MenuItem menuIncreaseBondSize = new MenuItem("Increase");
     private MenuItem menuDecreaseBondSize = new MenuItem("Decrease");
+    private MenuItem menuStatistics = new MenuItem("Statistics");
+
+    private Menu menuServices = new Menu("Services");
     private MenuItem menuRunBlast = new MenuItem("Run BLAST...");
     private MenuItem menuShowBlastResults = new MenuItem("Show BLAST results");
 
@@ -77,10 +82,10 @@ public class ProteinView {
     public ProteinView(BorderPane borderPane, Protein protein) {
         this.protein = protein;
         this.borderPane = borderPane;
+        initPieChart();
         initViews();
         initMenuBar();
         initToolBar();
-        initPieChart();
         initBindings();
         initCrossLinking();
     }
@@ -111,7 +116,6 @@ public class ProteinView {
         pieChart.setTitle("Residue Types");
         pieChart.setMaxHeight(400);  // TODO hard coded right now
         pieChart.setMaxWidth(400);
-        borderPane.setRight(pieChart);
     }
 
     private void initMenuBar() {
@@ -122,7 +126,11 @@ public class ProteinView {
         menuColorBy.getItems().addAll(menuColorBySingleColor, menuColorByAminoAcid, menuColorBySecondaryStructure, menuColorByProperties);
         menuAtomSize.getItems().addAll(menuIncreaseAtomSize, menuDecreaseAtomSize);
         menuBondSize.getItems().addAll(menuIncreaseBondSize, menuDecreaseBondSize);
-        menuView.getItems().addAll(menuShow, menuVisualization, menuColorBy, menuAtomSize, menuBondSize, menuRunBlast, menuShowBlastResults);
+        menuView.getItems().addAll(menuShow, menuVisualization, menuStatistics);
+
+        menuEdit.getItems().addAll(menuColorBy, menuAtomSize, menuBondSize);
+
+        menuServices.getItems().addAll(menuRunBlast, menuShowBlastResults);
 
         menuShowAtoms.setSelected(true);
         menuShowBonds.setSelected(true);
@@ -130,7 +138,7 @@ public class ProteinView {
         menuColorByAminoAcid.setSelected(true);
         menuShowBlastResults.setDisable(true);
 
-        menuBar.getMenus().addAll(menuFile, menuEdit, menuView);
+        menuBar.getMenus().addAll(menuFile, menuEdit, menuView, menuServices);
         menuBar.useSystemMenuBarProperty().set(true);
         borderPane.getChildren().add(menuBar);
     }
@@ -185,7 +193,7 @@ public class ProteinView {
         visualizeRibbon.selectedProperty().bindBidirectional(menuVisualizeRibbon.selectedProperty());
         visualizeCartoon.selectedProperty().bindBidirectional(menuVisualizeCartoon.selectedProperty());
     }
-    
+
     public void initCrossLinking() {
         if (modelView.getModelVisualizations().containsKey(VisualizationMode.STICKS)) {
             SticksVisualization sticksVisualization = (SticksVisualization) modelView.getModelVisualization(VisualizationMode.STICKS);
@@ -357,5 +365,9 @@ public class ProteinView {
 
     public PieChart getPieChart() {
         return pieChart;
+    }
+
+    public MenuItem getMenuStatistics() {
+        return menuStatistics;
     }
 }

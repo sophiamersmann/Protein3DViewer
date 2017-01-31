@@ -5,7 +5,6 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Cylinder;
-import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import protein3DViewer.model.*;
@@ -27,7 +26,7 @@ public class CartoonVisualization extends AbstractModelVisualization {
 
     private List<Cylinder> helices;
     private List<MeshView> strands;
-    private List<Line> connections;
+    private List<Line> loops;
 
     private Group helixGroup;
     private Group strandGroup;
@@ -188,7 +187,7 @@ public class CartoonVisualization extends AbstractModelVisualization {
     }
 
     private void createConnections() {
-        connections = new ArrayList<>();
+        loops = new ArrayList<>();
         connectionGroup = new Group();
         for (Chain chain: model.getChains().values()) {
             List<Integer> residueIDs = new ArrayList<>(chain.getResidues().keySet());
@@ -206,7 +205,7 @@ public class CartoonVisualization extends AbstractModelVisualization {
                             nextRes.getAtom(AtomName.CARBON_ALPHA).getZ()
                     );
                     connection.setRadius(0.25);
-                    connections.add(connection);
+                    loops.add(connection);
                     connectionGroup.getChildren().addAll(connection);
                 }
             }

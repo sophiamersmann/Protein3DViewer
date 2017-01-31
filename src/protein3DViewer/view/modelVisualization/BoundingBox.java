@@ -20,22 +20,22 @@ public class BoundingBox extends Rectangle {
 
     private ObjectBinding<Rectangle> binding;
 
-    public BoundingBox(AbstractAtomView atomView, Pane pane, Property<Transform> worldTransform) {
-        binding = createBoundingBoxBinding(pane, atomView, worldTransform);
+    public BoundingBox(Node node, Pane pane, Property<Transform> worldTransform) {
+        binding = createBoundingBoxBinding(pane, node, worldTransform);
         initBindings(pane);
         setStroke(Color.BLACK);
         setFill(Color.TRANSPARENT);
         setMouseTransparent(true);
     }
 
-    private ObjectBinding<Rectangle> createBoundingBoxBinding(Pane pane, AbstractAtomView atomView, Property<Transform> worldTransform) {
+    private ObjectBinding<Rectangle> createBoundingBoxBinding(Pane pane, Node node, Property<Transform> worldTransform) {
         ObjectBinding<Rectangle> objectBinding = new ObjectBinding<Rectangle>() {
             @Override
             protected Rectangle computeValue() {
-                bind(worldTransform);
-                bind(atomView.xProperty(), atomView.yProperty());
-                bind(atomView.scaleXProperty(), atomView.scaleYProperty());
-                final Bounds boundsOnScreen = atomView.localToScreen(atomView.getBoundsInLocal());
+//                bind(worldTransform);
+//                bind(node.xProperty(), node.yProperty());
+//                bind(node.scaleXProperty(), node.scaleYProperty());
+                final Bounds boundsOnScreen = node.localToScreen(node.getBoundsInLocal());
                 final Bounds paneBoundsOnScreen = pane.localToScreen(pane.getBoundsInLocal());
                 final double xInScene = boundsOnScreen.getMinX() - paneBoundsOnScreen.getMinX();
                 final double yInScene = boundsOnScreen.getMinY() - paneBoundsOnScreen.getMinY();

@@ -28,7 +28,10 @@ public class SticksVisualization extends AbstractModelVisualization {
     private Group atomViewGroup;
     private Group bondViewGroup;
 
+//    private List<List<AbstractAtomView>> atomViewsPerResidue;
     private MySelectionModel<AbstractAtomView> selectionModel;
+//    private MySelectionModel<List<AbstractAtomView>> selectionModel;
+
 
 
     public SticksVisualization(Model model, ModelView modelView) {
@@ -43,9 +46,23 @@ public class SticksVisualization extends AbstractModelVisualization {
         initBondViews();
         showAtomViews();
         showBondViews();
+//        setUpSelectionModelList();
         initSelectionModel();
         bottomGroup.getChildren().addAll(bondViewGroup, atomViewGroup);
     }
+
+//    private void setUpSelectionModelList() {
+//        atomViewsPerResidue = new ArrayList<>();
+//        for (Chain chain: model.getChains().values()) {
+//            for (Residue residue: chain.getResidues().values()) {
+//                List<AbstractAtomView> views = new ArrayList<>();
+//                for (int atomID: residue.getAtoms().keySet()) {
+//                    views.add(atomViews.get(atomID));
+//                }
+//                atomViewsPerResidue.add(views);
+//            }
+//        }
+//    }
 
     @Override
     void createTopGroup() {
@@ -81,6 +98,70 @@ public class SticksVisualization extends AbstractModelVisualization {
 
 
     }
+
+//    private void initSelectionModel() {
+//        selectionModel = new MySelectionModel(atomViewsPerResidue.toArray());
+//        selectionModel.getSelectedItems().addListener(new ListChangeListener<AbstractAtomView>() {
+//            @Override
+//            public void onChanged(Change<? extends AbstractAtomView> c) {
+//                while (c.next()) {
+//                    if (c.wasAdded()) {
+//                        for (AbstractAtomView atomView : c.getAddedSubList()) {
+////                               atomView.addMarker();
+//                            BoundingBox bb = new BoundingBox(atomView, modelView.getBottomPane(), modelView.getBottomGroup().worldTransformProperty());
+//                            atomView.setBoundingBox(bb);
+//                            modelView.getTopPane().getChildren().add(bb);
+////                            atomView.setColor(Color.BLACK);
+//                        }
+//                    }
+//                    if (c.wasRemoved()) {
+//                        for (AbstractAtomView atomView : c.getRemoved()) {
+//                            modelView.getTopPane().getChildren().remove(atomView.getBoundingBox());
+////                            atomView.resetColor();
+////                               atomView.removeMarker();
+//                        }
+//                    }
+//                }
+//            }
+//        });
+//
+//
+//    }
+
+//    private void initSelectionModel() {
+//        selectionModel = new MySelectionModel(atomViewsPerResidue.toArray());
+//        selectionModel.getSelectedItems().addListener(new ListChangeListener<List<AbstractAtomView>>() {
+//            @Override
+//            public void onChanged(Change<? extends List<AbstractAtomView>> c) {
+//                while (c.next()) {
+//                    if (c.wasAdded()) {
+//                        for (List<AbstractAtomView> atomViews : c.getAddedSubList()) {
+////                               atomView.addMarker();
+//                            for (AbstractAtomView atomView: atomViews) {
+//                                BoundingBox bb = new BoundingBox(atomView, modelView.getBottomPane(), modelView.getBottomGroup().worldTransformProperty());
+//                                atomView.setBoundingBox(bb);
+//                                modelView.getTopPane().getChildren().add(bb);
+//                            }
+//
+////                            atomView.setColor(Color.BLACK);
+//                        }
+//                    }
+//                    if (c.wasRemoved()) {
+//                        for (List<AbstractAtomView> atomViews : c.getRemoved()) {
+//                            for (AbstractAtomView atomView: atomViews) {
+//                                modelView.getTopPane().getChildren().remove(atomView.getBoundingBox());
+//                            }
+//
+////                            atomView.resetColor();
+////                               atomView.removeMarker();
+//                        }
+//                    }
+//                }
+//            }
+//        });
+//
+//
+//    }
 
     private void initAtomViews() {
         atomViews = new HashMap<>();
@@ -140,6 +221,15 @@ public class SticksVisualization extends AbstractModelVisualization {
     public Map<Integer, AbstractAtomView> getAtomViews() {
         return atomViews;
     }
+
+//    public MySelectionModel<List<AbstractAtomView>> getSelectionModel() {
+//        return selectionModel;
+//    }
+//
+//    public List<List<AbstractAtomView>> getAtomViewsPerResidue() {
+//        return atomViewsPerResidue;
+//    }
+
 
     public MySelectionModel<AbstractAtomView> getSelectionModel() {
         return selectionModel;

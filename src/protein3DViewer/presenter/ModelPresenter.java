@@ -99,6 +99,10 @@ public class ModelPresenter {
         for (AbstractAtomView atomView: atomViews) {
             setUpAtomView(atomView);
         }
+//        SticksVisualization sticksVisualization = (SticksVisualization) modelView.getModelVisualization(VisualizationMode.STICKS);
+//        for (AbstractAtomView atomView: sticksVisualization.getAtomViews().values()) {
+//            setUpAtomView(atomView);
+//        }
 
     }
 
@@ -112,7 +116,12 @@ public class ModelPresenter {
                 if (event.isShiftDown()) {
                     atomView.setShiftSelected(!atomView.isShiftSelected());
                 } else {
+                    SticksVisualization sticksVisualization = (SticksVisualization) modelView.getModelVisualization(VisualizationMode.STICKS);
                     atomView.setSelected(!atomView.isSelected());
+                    for (int atomID: atomView.getAtom().getResidue().getAtoms().keySet()) {
+                        AbstractAtomView view = sticksVisualization.getAtomViews().get(atomID);
+                        view.setShiftSelected(!view.isShiftSelected());
+                    }
                 }
             }
         });
@@ -122,7 +131,7 @@ public class ModelPresenter {
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 SticksVisualization sticksVisualization = (SticksVisualization) modelView.getModelVisualization(VisualizationMode.STICKS);
                 if (newValue) {
-                    sticksVisualization.getSelectionModel().select(atomViews.indexOf(atomView));
+                    sticksVisualization.getSelectionModel().clearAndSelect(atomViews.indexOf(atomView));
                 } else {
                     sticksVisualization.getSelectionModel().clearSelection(atomViews.indexOf(atomView)); // TODO
                 }
