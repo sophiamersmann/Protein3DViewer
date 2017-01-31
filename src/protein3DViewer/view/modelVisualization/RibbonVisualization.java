@@ -7,6 +7,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import protein3DViewer.model.*;
+import protein3DViewer.view.ModelView;
 
 import java.util.*;
 
@@ -23,8 +24,8 @@ public class RibbonVisualization extends AbstractModelVisualization {
     private TriangleMesh ribbonMesh;
     private MeshView ribbonMeshView;
 
-    public RibbonVisualization(Model model) {
-        super(model);
+    public RibbonVisualization(Model model, ModelView modelView) {
+        super(model, modelView);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package protein3DViewer.presenter;
 
+import com.sun.media.sound.ModelPerformer;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.WorkerStateEvent;
@@ -16,7 +17,9 @@ import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import protein3DViewer.BlastSearchResultParser;
 import protein3DViewer.BlastService;
+import protein3DViewer.model.Model;
 import protein3DViewer.model.Protein;
+import protein3DViewer.model.SeqResRecord;
 import protein3DViewer.view.ColorMode;
 import protein3DViewer.view.VisualizationMode;
 import protein3DViewer.view.atomView.AbstractAtomView;
@@ -35,9 +38,14 @@ public class ProteinPresenter {
     private Protein protein;
     private String blastFirstAlignment;
 
+    private ModelPresenter modelPresenter;
+    private SequencePresenter sequencePresenter;
+
     public ProteinPresenter(ProteinView proteinView, Protein protein) {
         this.proteinView = proteinView;
         this.protein = protein;
+        this.modelPresenter = proteinView.getModelPresenter();
+        this.sequencePresenter = proteinView.getSequencePresenter();
         setUpMenuBar();
         setUpToolBar();
         setUpPieChart();
@@ -278,6 +286,7 @@ public class ProteinPresenter {
                 proteinView.getBondSizeSlider().setDisable(!newValue);
                 if (newValue) {
                     proteinView.getModelView().addVisualization(VisualizationMode.STICKS);
+                    modelPresenter.setUpAtomViews();
                 } else {
                     proteinView.getModelView().removeVisualization(VisualizationMode.STICKS);
                 }

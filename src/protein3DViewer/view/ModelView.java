@@ -2,14 +2,16 @@ package protein3DViewer.view;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ListChangeListener;
 import javafx.scene.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
-import protein3DViewer.model.AtomName;
-import protein3DViewer.model.Model;
+import protein3DViewer.MySelectionModel;
+import protein3DViewer.model.*;
 import protein3DViewer.view.atomView.AbstractAtomView;
 import protein3DViewer.view.atomView.CarbonView;
 import protein3DViewer.view.modelVisualization.AbstractModelVisualization;
@@ -17,7 +19,9 @@ import protein3DViewer.view.modelVisualization.BoundingBox;
 import protein3DViewer.view.modelVisualization.ModelVisualizationFactory;
 import protein3DViewer.view.modelVisualization.SticksVisualization;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,15 +49,57 @@ public class ModelView extends Group {
         stackPane.setPrefSize(1500, 1500);
 //        initModelTransformListener();
         init3DView();
+        adjustProteinPosition();
         topPane.setPickOnBounds(false);
         addVisualization(INITIAL_VISUALIZATION_MODE);
         stackPane.getChildren().addAll(bottomPane, topPane);
         getChildren().addAll(stackPane);
+    }
 
-//        SticksVisualization sticksVisualization = (SticksVisualization) modelVisualizations.get(VisualizationMode.STICKS);
-//        AbstractAtomView atomView = sticksVisualization.getAtomViews().get(1);
-//        BoundingBox bb = new BoundingBox(atomView, topPane, bottomGroup.worldTransformProperty());
-//        bottomPane.getChildren().add(bb);
+
+    private void adjustProteinPosition() {
+        double minX = Double.POSITIVE_INFINITY, maxX = Double.NEGATIVE_INFINITY;
+        double minY = Double.POSITIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
+        double minZ = Double.POSITIVE_INFINITY, maxZ = Double.NEGATIVE_INFINITY;
+        for (Chain chain: model.getChains().values()) {
+            for (Residue residue: chain.getResidues().values()) {
+                for (Atom atom: residue.getAtoms().values()) {
+                    if (atom.getX() < minX) {
+                        minX = atom.getX();
+                    }
+                    if (atom.getX() > maxX) {
+                        maxX = atom.getX();
+                    }
+                    if (atom.getY() < minY) {
+                        minY = atom.getY();
+                    }
+                    if (atom.getY() > maxY) {
+                        maxY = atom.getY();
+                    }
+                    if (atom.getZ() < minZ) {
+                        minZ = atom.getZ();
+                    }
+                    if (atom.getZ() > maxZ) {
+                        maxZ = atom.getZ();
+                    }
+                }
+            }
+        }
+        double centerX = 0.5 * (minX + maxX);
+        double centerY = 0.5 * (minY + maxY);
+        double centerZ = 0.5 * (minZ + maxZ);
+        double offsetX = camera.getTranslateX() - centerX;
+        double offsetY = camera.getTranslateY() - centerY;
+        double offsetZ = camera.getTranslateZ() - centerZ;
+        for (Chain chain: model.getChains().values()) {
+            for (Residue residue: chain.getResidues().values()) {
+                for (Atom atom: residue.getAtoms().values()) {
+                    atom.setX(atom.getX() + offsetX);
+                    atom.setY(atom.getY() + offsetY);
+//                    atom.setZ(atom.getZ() + offsetZ);
+                }
+            }
+        }
     }
 
 //    private void initModelTransformListener() {
@@ -63,11 +109,11 @@ public class ModelView extends Group {
 //    }
 
     private void init3DView() {
-        subScene = new SubScene(bottomGroup, 1500, 1500, true, SceneAntialiasing.BALANCED);  // TODO: hard coded right now
+        subScene = new SubScene(bottomGroup, 800, 800, true, SceneAntialiasing.BALANCED);  // TODO: hard coded right now
         subScene.setFill(Color.LIGHTGREY);
-        camera = new PerspectiveCamera();
-        subScene.widthProperty().bind(bottomPane.widthProperty());
-        subScene.heightProperty().bind(bottomPane.heightProperty());
+        camera = new PerspectiveCamera(true);
+//        subScene.widthProperty().bind(bottomPane.widthProperty());
+//        subScene.heightProperty().bind(bottomPane.heightProperty());
 //        camera.translateXProperty().bindBidirectional(bottomPane.prefWidthProperty());
 //        camera.translateYProperty().bindBidirectional(bottomPane.prefHeightProperty());
         camera.setNearClip(0.1);
@@ -78,7 +124,7 @@ public class ModelView extends Group {
     }
 
     public void addVisualization(VisualizationMode visualizationMode) {
-        modelVisualizations.put(visualizationMode, ModelVisualizationFactory.createModelVisualization(model, visualizationMode));
+        modelVisualizations.put(visualizationMode, ModelVisualizationFactory.createModelVisualization(model, this, visualizationMode));
 //        bottomPane.getChildren().add(modelVisualizations.get(visualizationMode).getBottomGroup());
         bottomGroup.getChildren().add(modelVisualizations.get(visualizationMode).getBottomGroup());
         topPane.getChildren().add(modelVisualizations.get(visualizationMode).getTopGroup());

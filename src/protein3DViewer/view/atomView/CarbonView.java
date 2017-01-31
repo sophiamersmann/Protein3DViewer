@@ -14,7 +14,7 @@ public class CarbonView extends AbstractAtomView {
     public CarbonView(Atom atom) {
         super(atom);
         setDefaultRadius(RADIUS);
-        setMaterial(COLOR);
+        setColor(COLOR);
     }
 
 }

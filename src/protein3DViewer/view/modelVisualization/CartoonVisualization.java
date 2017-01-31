@@ -9,6 +9,7 @@ import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import protein3DViewer.model.*;
+import protein3DViewer.view.ModelView;
 import protein3DViewer.view.atomView.AbstractAtomView;
 import protein3DViewer.view.bondView.Line;
 
@@ -34,8 +35,8 @@ public class CartoonVisualization extends AbstractModelVisualization {
 
     private Map<Integer, Map<AtomName, Integer>> mapResIdToAtomToIndex;
 
-    public CartoonVisualization(Model model) {
-        super(model);
+    public CartoonVisualization(Model model, ModelView modelView) {
+        super(model, modelView);
     }
 
     @Override

@@ -4,12 +4,19 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Group;
+import javafx.scene.effect.Bloom;
+import javafx.scene.effect.Effect;
+import javafx.scene.effect.Glow;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
 import protein3DViewer.model.Atom;
 import protein3DViewer.view.ColorMode;
+import protein3DViewer.view.modelVisualization.BoundingBox;
+import sun.jvm.hotspot.opto.PhiNode;
 
 /**
  * Created by sophiamersmann on 20/01/2017.
@@ -29,16 +36,30 @@ public abstract class AbstractAtomView extends Group {
 
     Atom atom;
     Sphere shape;
+//    Sphere marker;
 
     DoubleProperty x = new SimpleDoubleProperty();
     DoubleProperty y = new SimpleDoubleProperty();
     DoubleProperty z = new SimpleDoubleProperty();
 
     BooleanProperty selected = new SimpleBooleanProperty();
+    BooleanProperty shiftSelected = new SimpleBooleanProperty();
+
+    Color color;
+    Color prevColor;
+
+    BoundingBox boundingBox;
 
     public AbstractAtomView(Atom atom) {
         this.atom = atom;
         shape = new Sphere();
+//        shape.radiusProperty().addListener(new ChangeListener<Number>() {
+//            @Override
+//            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+//                marker.setRadius((double) newValue / 3);
+//            }
+//        });
+//        setEffect(new Bloom(0.8));
         setTranslateX(atom.getX());
         setTranslateY(atom.getY());
         setTranslateZ(atom.getZ());
@@ -48,24 +69,62 @@ public abstract class AbstractAtomView extends Group {
         x.bindBidirectional(translateXProperty());
         y.bindBidirectional(translateYProperty());
         z.bindBidirectional(translateZProperty());
+//        initMarker();
         getChildren().add(shape);
     }
+
+//    private void initMarker() {
+//        marker = new Sphere();
+//        marker.setRadius(shape.getRadius() / 3);
+//        marker.setMaterial(new PhongMaterial(Color.YELLOW));
+//        marker.translateXProperty().bind(shape.translateXProperty());
+//        marker.translateYProperty().bind(shape.translateYProperty());
+//        marker.translateZProperty().bind(shape.translateZProperty());
+//        marker.scaleXProperty().bind(shape.scaleXProperty());
+//        marker.scaleYProperty().bind(shape.scaleYProperty());
+//        marker.scaleZProperty().bind(shape.scaleZProperty());
+//        marker.rotationAxisProperty().bind(shape.rotationAxisProperty());
+//        marker.rotateProperty().bind(shape.rotateProperty());
+//    }
+//
+//    public void addMarker() {
+//        getChildren().add(marker);
+//    }
+//
+//    public void removeMarker() {
+//        getChildren().remove(marker);
+//    }
 
     public void setDefaultRadius(Integer scaleFactor) {
         shape.setRadius(1 / (scaleFactor * 0.1));
     }
 
-    public void setMaterial(Color color) {
-        PhongMaterial material = new PhongMaterial();
-        material.setDiffuseColor(color);
-        material.setSpecularColor(Color.BLACK);
-        shape.setMaterial(material);
+    public void setColor(Color color) {
+        prevColor = this.color;
+        this.color = color;
+        shape.setMaterial(new PhongMaterial(color));
     }
 
-    public Color getDiffuseColor() {
-        PhongMaterial material = (PhongMaterial) shape.getMaterial();
-        return material.getDiffuseColor();
+    public void resetColor() {
+        if (prevColor != null) {
+            shape.setMaterial(new PhongMaterial(prevColor));
+        }
+        Color tmp = color;
+        color = prevColor;
+        prevColor = tmp; // TODO
     }
+
+//    public void setMaterial(Color color) {
+//        PhongMaterial material = new PhongMaterial();
+//        material.setDiffuseColor(color);
+//        material.setSpecularColor(Color.BLACK);
+//        shape.setMaterial(material);
+//    }
+
+//    public Color getDiffuseColor() {
+//        PhongMaterial material = (PhongMaterial) shape.getMaterial();
+//        return material.getDiffuseColor();
+//    }
 
     public void changeRadius(Double factor) {
         shape.setRadius(shape.getRadius() + factor);
@@ -114,6 +173,14 @@ public abstract class AbstractAtomView extends Group {
         }
     }
 
+    public BoundingBox getBoundingBox() {
+        return boundingBox;
+    }
+
+    public void setBoundingBox(BoundingBox boundingBox) {
+        this.boundingBox = boundingBox;
+    }
+
     public Atom getAtom() {
         return atom;
     }
@@ -154,7 +221,7 @@ public abstract class AbstractAtomView extends Group {
         this.z.set(z);
     }
 
-    public boolean getSelected() {
+    public boolean isSelected() {
         return selected.get();
     }
 
@@ -164,6 +231,18 @@ public abstract class AbstractAtomView extends Group {
 
     public void setSelected(boolean selected) {
         this.selected.set(selected);
+    }
+
+    public boolean isShiftSelected() {
+        return shiftSelected.get();
+    }
+
+    public BooleanProperty shiftSelectedProperty() {
+        return shiftSelected;
+    }
+
+    public void setShiftSelected(boolean shiftSelected) {
+        this.shiftSelected.set(shiftSelected);
     }
 
     @Override

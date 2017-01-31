@@ -14,7 +14,7 @@ public class NitrogenView extends AbstractAtomView {
     public NitrogenView(Atom atom) {
         super(atom);
         setDefaultRadius(RADIUS);
-        setMaterial(COLOR);
+        setColor(COLOR);
     }
 
 

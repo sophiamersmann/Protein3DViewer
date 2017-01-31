@@ -8,6 +8,7 @@ import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Transform;
 import protein3DViewer.view.atomView.AbstractAtomView;
@@ -19,9 +20,12 @@ public class BoundingBox extends Rectangle {
 
     private ObjectBinding<Rectangle> binding;
 
-    public BoundingBox(AbstractAtomView atomView, Pane topPane, Property<Transform> worldTransform) {
-        binding = createBoundingBoxBinding(topPane, atomView, worldTransform);
-        initBindings();
+    public BoundingBox(AbstractAtomView atomView, Pane pane, Property<Transform> worldTransform) {
+        binding = createBoundingBoxBinding(pane, atomView, worldTransform);
+        initBindings(pane);
+        setStroke(Color.BLACK);
+        setFill(Color.TRANSPARENT);
+        setMouseTransparent(true);
     }
 
     private ObjectBinding<Rectangle> createBoundingBoxBinding(Pane pane, AbstractAtomView atomView, Property<Transform> worldTransform) {
@@ -41,7 +45,7 @@ public class BoundingBox extends Rectangle {
         return objectBinding;
     }
 
-    private void initBindings() {
+    private void initBindings(Pane pane) {
         xProperty().bind(new DoubleBinding() {
             {
                 bind(binding);
@@ -79,6 +83,26 @@ public class BoundingBox extends Rectangle {
             @Override
             protected double computeValue() {
                 return binding.get().getScaleY();
+            }
+        });
+
+        widthProperty().bind(new DoubleBinding() {
+            {
+                bind(binding);
+            }
+            @Override
+            protected double computeValue() {
+                return binding.get().getWidth();
+            }
+        });
+
+        heightProperty().bind(new DoubleBinding() {
+            {
+                bind(binding);
+            }
+            @Override
+            protected double computeValue() {
+                return binding.get().getHeight();
             }
         });
     }

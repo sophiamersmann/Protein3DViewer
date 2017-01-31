@@ -1,5 +1,6 @@
 package protein3DViewer.view;
 
+import com.sun.javafx.sg.prism.NGShape;
 import com.sun.xml.internal.xsom.impl.scd.Iterators;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -30,6 +31,9 @@ public class ProteinView {
 
     private SequenceView sequenceView;
     private ModelView modelView;
+
+    private ModelPresenter modelPresenter;
+    private SequencePresenter sequencePresenter;
 
     private MenuBar menuBar = new MenuBar();
     private Menu menuFile = new Menu("File");
@@ -78,6 +82,7 @@ public class ProteinView {
         initToolBar();
         initPieChart();
         initBindings();
+        initCrossLinking();
     }
 
     private void initPieChart() {
@@ -162,25 +167,15 @@ public class ProteinView {
 
     private void initViews() {
         modelView = new ModelView(protein.getModel());
-        new ModelPresenter(modelView, protein.getModel());
+        modelPresenter = new ModelPresenter(modelView, protein.getModel());
         borderPane.setCenter(modelView);
         BorderPane.setAlignment(borderPane.getCenter(), Pos.CENTER);
 
         sequenceView = new SequenceView(protein.getSeqResRecord(), protein.getSecondaryStructure());
-        new SequencePresenter(sequenceView, protein.getSeqResRecord());
+        sequencePresenter = new SequencePresenter(sequenceView, protein.getSeqResRecord());
         borderPane.setTop(sequenceView);
         BorderPane.setMargin(borderPane.getTop(), new Insets(10, 0, 10, 0));
         BorderPane.setAlignment(borderPane.getTop(), Pos.CENTER);
-
-        if (modelView.getModelVisualizations().containsKey(VisualizationMode.STICKS)) {
-            SticksVisualization sticksVisualization = (SticksVisualization) modelView.getModelVisualization(VisualizationMode.STICKS);
-            for (AbstractAtomView atomView: sticksVisualization.getAtomViews().values()) {
-                Integer residueId = atomView.getAtom().getResidue().getId();
-                SelectableLabel associatedResidueView = sequenceView.getResidueViews().get(residueId);
-                atomView.selectedProperty().bindBidirectional(associatedResidueView.selectedProperty());
-//                associatedResidueView.selectedProperty().bind(atomView.selectedProperty());
-            }
-        }
     }
 
     private void initBindings() {
@@ -189,6 +184,27 @@ public class ProteinView {
         visualizeSticks.selectedProperty().bindBidirectional(menuVisualizeSticks.selectedProperty());
         visualizeRibbon.selectedProperty().bindBidirectional(menuVisualizeRibbon.selectedProperty());
         visualizeCartoon.selectedProperty().bindBidirectional(menuVisualizeCartoon.selectedProperty());
+    }
+    
+    public void initCrossLinking() {
+        if (modelView.getModelVisualizations().containsKey(VisualizationMode.STICKS)) {
+            SticksVisualization sticksVisualization = (SticksVisualization) modelView.getModelVisualization(VisualizationMode.STICKS);
+            for (AbstractAtomView atomView: sticksVisualization.getAtomViews().values()) {
+                Integer residueId = atomView.getAtom().getResidue().getId();
+                SelectableLabel associatedResidueView = sequenceView.getResidueViews().get(residueId);
+                atomView.selectedProperty().bindBidirectional(associatedResidueView.selectedProperty());
+                atomView.shiftSelectedProperty().bindBidirectional(associatedResidueView.shiftSelectedProperty());
+//                associatedResidueView.selectedProperty().bind(atomView.selectedProperty());
+            }
+        }
+    }
+
+    public ModelPresenter getModelPresenter() {
+        return modelPresenter;
+    }
+
+    public SequencePresenter getSequencePresenter() {
+        return sequencePresenter;
     }
 
     public BorderPane getBorderPane() {

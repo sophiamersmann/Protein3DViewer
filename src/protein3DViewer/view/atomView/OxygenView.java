@@ -14,7 +14,7 @@ public class OxygenView extends AbstractAtomView {
     public OxygenView(Atom atom) {
         super(atom);
         setDefaultRadius(RADIUS);
-        setMaterial(COLOR);
+        setColor(COLOR);
     }
 
 }

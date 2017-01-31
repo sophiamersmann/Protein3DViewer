@@ -1,6 +1,7 @@
 package protein3DViewer.view.modelVisualization;
 
 import protein3DViewer.model.Model;
+import protein3DViewer.view.ModelView;
 import protein3DViewer.view.VisualizationMode;
 
 /**
@@ -8,13 +9,13 @@ import protein3DViewer.view.VisualizationMode;
  */
 public class ModelVisualizationFactory {
 
-    public static AbstractModelVisualization createModelVisualization(Model model, VisualizationMode mode) {
+    public static AbstractModelVisualization createModelVisualization(Model model, ModelView modelView, VisualizationMode mode) {
         if (mode == VisualizationMode.STICKS) {
-            return new SticksVisualization(model);
+            return new SticksVisualization(model, modelView);
         } else if (mode == VisualizationMode.RIBBON) {
-            return new RibbonVisualization(model);
+            return new RibbonVisualization(model, modelView);
         } else if (mode == VisualizationMode.CARTOON) {
-            return new CartoonVisualization(model);
+            return new CartoonVisualization(model, modelView);
         }
         return null;
     }

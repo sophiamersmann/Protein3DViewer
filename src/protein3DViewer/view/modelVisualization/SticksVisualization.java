@@ -1,9 +1,13 @@
 package protein3DViewer.view.modelVisualization;
 
+import javafx.collections.ListChangeListener;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
+import protein3DViewer.MySelectionModel;
 import protein3DViewer.model.*;
 import protein3DViewer.view.ColorMode;
+import protein3DViewer.view.ModelView;
+import protein3DViewer.view.VisualizationMode;
 import protein3DViewer.view.bondView.BondView;
 import protein3DViewer.view.atomView.AbstractAtomView;
 import protein3DViewer.view.atomView.AtomViewFactory;
@@ -24,8 +28,11 @@ public class SticksVisualization extends AbstractModelVisualization {
     private Group atomViewGroup;
     private Group bondViewGroup;
 
-    public SticksVisualization(Model model) {
-        super(model);
+    private MySelectionModel<AbstractAtomView> selectionModel;
+
+
+    public SticksVisualization(Model model, ModelView modelView) {
+        super(model, modelView);
     }
 
     @Override
@@ -36,11 +43,42 @@ public class SticksVisualization extends AbstractModelVisualization {
         initBondViews();
         showAtomViews();
         showBondViews();
+        initSelectionModel();
         bottomGroup.getChildren().addAll(bondViewGroup, atomViewGroup);
     }
 
     @Override
     void createTopGroup() {
+
+    }
+
+    private void initSelectionModel() {
+        List<AbstractAtomView> atomViewsList = new ArrayList<>(atomViews.values());
+        selectionModel = new MySelectionModel(atomViewsList.toArray());
+        selectionModel.getSelectedItems().addListener(new ListChangeListener<AbstractAtomView>() {
+            @Override
+            public void onChanged(Change<? extends AbstractAtomView> c) {
+                while (c.next()) {
+                    if (c.wasAdded()) {
+                        for (AbstractAtomView atomView : c.getAddedSubList()) {
+//                               atomView.addMarker();
+                            BoundingBox bb = new BoundingBox(atomView, modelView.getBottomPane(), modelView.getBottomGroup().worldTransformProperty());
+                            atomView.setBoundingBox(bb);
+                            modelView.getTopPane().getChildren().add(bb);
+//                            atomView.setColor(Color.BLACK);
+                        }
+                    }
+                    if (c.wasRemoved()) {
+                        for (AbstractAtomView atomView : c.getRemoved()) {
+                            modelView.getTopPane().getChildren().remove(atomView.getBoundingBox());
+//                            atomView.resetColor();
+//                               atomView.removeMarker();
+                        }
+                    }
+                }
+            }
+        });
+
 
     }
 
@@ -95,11 +133,15 @@ public class SticksVisualization extends AbstractModelVisualization {
     public void changeAtomColor(ColorMode colorMode) {
         for (AbstractAtomView atomView : atomViews.values()) {
             Color color = atomView.getColor(colorMode);  // TODO getColor static?
-            atomView.setMaterial(color);
+            atomView.setColor(color);
         }
     }
 
     public Map<Integer, AbstractAtomView> getAtomViews() {
         return atomViews;
+    }
+
+    public MySelectionModel<AbstractAtomView> getSelectionModel() {
+        return selectionModel;
     }
 }

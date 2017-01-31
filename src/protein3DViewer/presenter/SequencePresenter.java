@@ -24,71 +24,28 @@ public class SequencePresenter {
     private SequenceView sequenceView;
 
     private List<SelectableLabel> residueViews;
-    private MySelectionModel<SelectableLabel> selectionModelResidueSeq;
-
-    private MySelectionModel<SelectableLabel> selectionModelAnnotationSeq;
+//    private MySelectionModel<SelectableLabel> selectionModelResidueSeq;
+//
+//    private MySelectionModel<SelectableLabel> selectionModelAnnotationSeq;
 
     public SequencePresenter(SequenceView sequenceView, SeqResRecord seqResRecord) {
         this.sequenceView = sequenceView;
         this.seqResRecord = seqResRecord;
-        initSelectionModels();
         setUpResidueViews();
         setUpSecondaryStructureAnnotations();
     }
 
-    private void initSelectionModels() {
-        residueViews = new ArrayList<>(sequenceView.getResidueViews().values());
-        selectionModelResidueSeq = new MySelectionModel(residueViews.toArray());
-        selectionModelResidueSeq.getSelectedItems().addListener(new ListChangeListener<SelectableLabel>() {
-            @Override
-            public void onChanged(Change<? extends SelectableLabel> c) {
-                while (c.next()) {
-                    if (c.wasAdded()) {
-                        for (SelectableLabel label: c.getAddedSubList()) {
-                            label.setTextFill(Color.RED);
-                        }
-                    }
-                    if (c.wasRemoved()) {
-                        for (SelectableLabel label: c.getRemoved()) {
-                            label.setTextFill(Color.BLACK);
-                        }
-                    }
-                }
-            }
-
-        });
-
-        selectionModelAnnotationSeq = new MySelectionModel(sequenceView.getSecondaryStructureAnnotations().toArray());
-        selectionModelAnnotationSeq.getSelectedItems().addListener(new ListChangeListener<SelectableLabel>() {
-            @Override
-            public void onChanged(Change<? extends SelectableLabel> c) {
-                while (c.next()) {
-                    if (c.wasAdded()) {
-                        for (SelectableLabel label: c.getAddedSubList()) {
-                            label.setTextFill(Color.RED);
-                        }
-                    }
-                    if (c.wasRemoved()) {
-                        for (SelectableLabel label: c.getRemoved()) {
-                            label.setTextFill(Color.BLACK);
-                        }
-                    }
-                }
-            }
-        });
-    }
-
     private void setUpResidueViews() {
+        residueViews = new ArrayList<>(sequenceView.getResidueViews().values());
         for (SelectableLabel label: residueViews) {
-            setUpSelectableLabel(label, residueViews, selectionModelResidueSeq);
+            setUpSelectableLabel(label, residueViews, sequenceView.getSelectionModelResidueSeq());
         }
     }
 
     private void setUpSecondaryStructureAnnotations() {
         for (SelectableLabel label: sequenceView.getSecondaryStructureAnnotations()) {
-            if (!label.getText().equals(" ")) {
-                setUpSelectableLabel(label, sequenceView.getSecondaryStructureAnnotations(), selectionModelAnnotationSeq);
-            }
+            setUpSelectableLabel(label, sequenceView.getSecondaryStructureAnnotations(), sequenceView.getSelectionModelAnnotationSeq());
+
         }
     }
 
@@ -97,7 +54,11 @@ public class SequencePresenter {
             @Override
             public void handle(MouseEvent event) {
                 event.consume();
-                label.setSelected(!label.isSelected());
+                if (event.isShiftDown()) {
+                    label.setShiftSelected(!label.isShiftSelected());
+                } else {
+                    label.setSelected(!label.isSelected());
+                }
             }
         });
 
@@ -105,9 +66,20 @@ public class SequencePresenter {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 if (newValue) {
-                    selectionModel.select(labels.indexOf(label));
+                    selectionModel.clearAndSelect(labels.indexOf(label));
                 } else {
                     selectionModel.clearSelection();
+                }
+            }
+        });
+
+        label.shiftSelectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if (newValue) {
+                    selectionModel.select(labels.indexOf(label));
+                } else {
+                    selectionModel.clearSelection(labels.indexOf(label));
                 }
             }
         });
