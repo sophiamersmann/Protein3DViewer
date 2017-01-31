@@ -41,6 +41,7 @@ public class SticksVisualization extends AbstractModelVisualization {
 
     @Override
     void createTopGroup() {
+
     }
 
     private void initAtomViews() {
@@ -98,4 +99,7 @@ public class SticksVisualization extends AbstractModelVisualization {
         }
     }
 
+    public Map<Integer, AbstractAtomView> getAtomViews() {
+        return atomViews;
+    }
 }

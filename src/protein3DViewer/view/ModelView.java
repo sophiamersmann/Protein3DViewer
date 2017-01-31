@@ -5,11 +5,17 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
+import protein3DViewer.model.AtomName;
 import protein3DViewer.model.Model;
+import protein3DViewer.view.atomView.AbstractAtomView;
+import protein3DViewer.view.atomView.CarbonView;
 import protein3DViewer.view.modelVisualization.AbstractModelVisualization;
+import protein3DViewer.view.modelVisualization.BoundingBox;
 import protein3DViewer.view.modelVisualization.ModelVisualizationFactory;
+import protein3DViewer.view.modelVisualization.SticksVisualization;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,11 +30,11 @@ public class ModelView extends Group {
     private StackPane stackPane = new StackPane();
     private Pane topPane = new Pane();
     private Pane bottomPane = new Pane();
-    private Group bottomGroup = new Group();
+    private BottomGroup bottomGroup = new BottomGroup();
     private SubScene subScene;
     private Camera camera;
 
-    private final Property<Transform> modelTransform = new SimpleObjectProperty<>(new Rotate());
+//    private final Property<Transform> modelTransform = new SimpleObjectProperty<>(new Rotate());
 
     private Map<VisualizationMode, AbstractModelVisualization> modelVisualizations = new HashMap<>();
 
@@ -36,23 +42,32 @@ public class ModelView extends Group {
 
     public ModelView(Model model) {
         this.model = model;
-        initModelTransformListener();
+        stackPane.setPrefSize(1500, 1500);
+//        initModelTransformListener();
         init3DView();
         topPane.setPickOnBounds(false);
         addVisualization(INITIAL_VISUALIZATION_MODE);
         stackPane.getChildren().addAll(bottomPane, topPane);
         getChildren().addAll(stackPane);
+
+//        SticksVisualization sticksVisualization = (SticksVisualization) modelVisualizations.get(VisualizationMode.STICKS);
+//        AbstractAtomView atomView = sticksVisualization.getAtomViews().get(1);
+//        BoundingBox bb = new BoundingBox(atomView, topPane, bottomGroup.worldTransformProperty());
+//        bottomPane.getChildren().add(bb);
     }
 
-    private void initModelTransformListener() {
-        modelTransform.addListener((observable, oldValue, newValue) -> {
-            this.getTransforms().setAll(newValue);
-        });
-    }
+//    private void initModelTransformListener() {
+//        modelTransform.addListener((observable, oldValue, newValue) -> {
+//            this.getTransforms().setAll(newValue);
+//        });
+//    }
 
     private void init3DView() {
-        subScene = new SubScene(bottomGroup, 500, 500);  // TODO: hard coded right now
+        subScene = new SubScene(bottomGroup, 1500, 1500, true, SceneAntialiasing.BALANCED);  // TODO: hard coded right now
+        subScene.setFill(Color.LIGHTGREY);
         camera = new PerspectiveCamera();
+        subScene.widthProperty().bind(bottomPane.widthProperty());
+        subScene.heightProperty().bind(bottomPane.heightProperty());
 //        camera.translateXProperty().bindBidirectional(bottomPane.prefWidthProperty());
 //        camera.translateYProperty().bindBidirectional(bottomPane.prefHeightProperty());
         camera.setNearClip(0.1);
@@ -89,13 +104,13 @@ public class ModelView extends Group {
         return bottomPane;
     }
 
-    public Transform getModelTransform() {
-        return modelTransform.getValue();
-    }
-
-    public Property<Transform> modelTransformProperty() {
-        return modelTransform;
-    }
+//    public Transform getWorldTransform() {
+//        return modelTransform.getValue();
+//    }
+//
+//    public Property<Transform> worldTransformProperty() {
+//        return modelTransform;
+//    }
 
     public Map<VisualizationMode, AbstractModelVisualization> getModelVisualizations() {
         return modelVisualizations;
@@ -105,7 +120,7 @@ public class ModelView extends Group {
         return modelVisualizations.get(mode);
     }
 
-    public Camera getCamera() {
-        return camera;
+    public BottomGroup getBottomGroup() {
+        return bottomGroup;
     }
 }

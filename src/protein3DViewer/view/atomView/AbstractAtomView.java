@@ -1,6 +1,8 @@
 package protein3DViewer.view.atomView;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
@@ -32,6 +34,8 @@ public abstract class AbstractAtomView extends Group {
     DoubleProperty y = new SimpleDoubleProperty();
     DoubleProperty z = new SimpleDoubleProperty();
 
+    BooleanProperty selected = new SimpleBooleanProperty();
+
     public AbstractAtomView(Atom atom) {
         this.atom = atom;
         shape = new Sphere();
@@ -56,6 +60,11 @@ public abstract class AbstractAtomView extends Group {
         material.setDiffuseColor(color);
         material.setSpecularColor(Color.BLACK);
         shape.setMaterial(material);
+    }
+
+    public Color getDiffuseColor() {
+        PhongMaterial material = (PhongMaterial) shape.getMaterial();
+        return material.getDiffuseColor();
     }
 
     public void changeRadius(Double factor) {
@@ -105,6 +114,10 @@ public abstract class AbstractAtomView extends Group {
         }
     }
 
+    public Atom getAtom() {
+        return atom;
+    }
+
     public double getX() {
         return x.get();
     }
@@ -139,6 +152,18 @@ public abstract class AbstractAtomView extends Group {
 
     public void setZ(double z) {
         this.z.set(z);
+    }
+
+    public boolean getSelected() {
+        return selected.get();
+    }
+
+    public BooleanProperty selectedProperty() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected.set(selected);
     }
 
     @Override

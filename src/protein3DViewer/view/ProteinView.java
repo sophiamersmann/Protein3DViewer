@@ -15,6 +15,7 @@ import protein3DViewer.model.Residue;
 import protein3DViewer.presenter.ModelPresenter;
 import protein3DViewer.presenter.SequencePresenter;
 import protein3DViewer.view.atomView.AbstractAtomView;
+import protein3DViewer.view.modelVisualization.SticksVisualization;
 
 import java.util.*;
 
@@ -166,10 +167,20 @@ public class ProteinView {
         BorderPane.setAlignment(borderPane.getCenter(), Pos.CENTER);
 
         sequenceView = new SequenceView(protein.getSeqResRecord(), protein.getSecondaryStructure());
-        new SequencePresenter(sequenceView);
+        new SequencePresenter(sequenceView, protein.getSeqResRecord());
         borderPane.setTop(sequenceView);
         BorderPane.setMargin(borderPane.getTop(), new Insets(10, 0, 10, 0));
         BorderPane.setAlignment(borderPane.getTop(), Pos.CENTER);
+
+        if (modelView.getModelVisualizations().containsKey(VisualizationMode.STICKS)) {
+            SticksVisualization sticksVisualization = (SticksVisualization) modelView.getModelVisualization(VisualizationMode.STICKS);
+            for (AbstractAtomView atomView: sticksVisualization.getAtomViews().values()) {
+                Integer residueId = atomView.getAtom().getResidue().getId();
+                SelectableLabel associatedResidueView = sequenceView.getResidueViews().get(residueId);
+                atomView.selectedProperty().bindBidirectional(associatedResidueView.selectedProperty());
+//                associatedResidueView.selectedProperty().bind(atomView.selectedProperty());
+            }
+        }
     }
 
     private void initBindings() {
