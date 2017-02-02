@@ -13,17 +13,16 @@ import protein3DViewer.view.bondView.Line;
 
 import java.util.*;
 
-import static protein3DViewer.view.modelVisualization.RibbonVisualization.toFloatArray;
-import static protein3DViewer.view.modelVisualization.RibbonVisualization.toIntArray;
+import static protein3DViewer.view.modelVisualization.MeshTools.createPseudoAtom;
+import static protein3DViewer.view.modelVisualization.MeshTools.toFloatArray;
+import static protein3DViewer.view.modelVisualization.MeshTools.toIntArray;
 
 /**
  * Created by sophiamersmann on 23/01/2017.
  */
 public class CartoonVisualization extends AbstractModelVisualization {
 
-    private final static Double CC_BOND_LENGTH = 1.54;
-
-    private List<Cylinder> helices;
+    private List<Line> helices;
     private List<MeshView> strands;
     private List<Line> loops;
 
@@ -45,54 +44,34 @@ public class CartoonVisualization extends AbstractModelVisualization {
         bottomGroup.getChildren().addAll(helixGroup, strandGroup, loopGroup);
     }
 
-    private void createHelixViews() {  // TODO use line
+    /**
+     * create helices as cylinder
+     */
+    private void createHelixViews() {
         helices = new ArrayList<>();
         helixGroup = new Group();
         for (Helix helix: model.getProtein().getSecondaryStructure().getHelices().values()) {
-            Cylinder cylinder = new Cylinder();
-            Point3D initPoint = new Point3D(
+            Line line = new Line(
                     helix.getInitResidue().getAtom(AtomName.CARBON_ALPHA).getX(),
                     helix.getInitResidue().getAtom(AtomName.CARBON_ALPHA).getY(),
-                    helix.getInitResidue().getAtom(AtomName.CARBON_ALPHA).getZ()
-            );
-            Point3D endPoint = new Point3D(
+                    helix.getInitResidue().getAtom(AtomName.CARBON_ALPHA).getZ(),
                     helix.getEndResidue().getAtom(AtomName.CARBON_ALPHA).getX(),
                     helix.getEndResidue().getAtom(AtomName.CARBON_ALPHA).getY(),
                     helix.getEndResidue().getAtom(AtomName.CARBON_ALPHA).getZ()
             );
-            Point3D direction = endPoint.subtract(initPoint);
-            Point3D midPoint = endPoint.midpoint(initPoint);
-            Point3D yAxis = new Point3D(0, 1, 0);
-            Point3D axisOfRotation = direction.crossProduct(yAxis);
-            double angle = yAxis.angle(direction);
-
-            cylinder.setTranslateX(midPoint.getX());
-            cylinder.setTranslateY(midPoint.getY());
-            cylinder.setTranslateZ(midPoint.getZ());
-            cylinder.setRotationAxis(axisOfRotation);
-            cylinder.setRotate(-angle);
-            cylinder.setHeight(direction.magnitude());
-            cylinder.setRadius(1);
-            cylinder.setMaterial(new PhongMaterial(ColorValue.HELIX.getColor()));
-            helices.add(cylinder);
-            helixGroup.getChildren().add(cylinder);
+            line.setRadius(1);
+            line.setMaterial(new PhongMaterial(ColorValue.HELIX.getColor()));
+            helices.add(line);
+            helixGroup.getChildren().add(line);
         }
     }
 
+    /**
+     * create strands as triangle meshes
+     */
     private void createStrandViews() {
         strands = new ArrayList<>();
         strandGroup = new Group();
-//        for (Chain chain: model.getChains().values()) {
-//            List<Integer> residueIDs = new ArrayList<>(chain.getResidues().keySet());
-//            Collections.sort(residueIDs);
-//            for (int i = 0; i < residueIDs.size() - 1; i++) {
-//                Residue currRes = chain.getResidues().get(residueIDs.get(i));
-//                Residue nextRes = chain.getResidues().get(residueIDs.get(i+1));
-//                if (currRes.isInSheet() && nextRes.isInSheet()) {
-//
-//                } else if (currRes.isInSheet())
-//            }
-//        }
         mapResIdToAtomToIndex = new HashMap<>();
         for (Sheet sheet: model.getProtein().getSecondaryStructure().getSheets().values()) {
             for (Strand strand: sheet.getStrands().values()) {
@@ -100,12 +79,6 @@ public class CartoonVisualization extends AbstractModelVisualization {
                 strandMesh.getTexCoords().addAll(0, 0);
                 strandMesh.getPoints().addAll(extractPoints(strand));
                 strandMesh.getFaces().addAll(generateFaces(strand));
-//                int[] smoothingGroups = new int[strandMesh.getFaces().size() / 6];
-//                Arrays.fill(smoothingGroups, 1);
-//                for (int i = 0; i < smoothingGroups.length / 2; i++) {
-//                    smoothingGroups[i] = 2;
-//                }
-//                strandMesh.getFaceSmoothingGroups().addAll(smoothingGroups);
                 mapResIdToAtomToIndex.clear();
                 MeshView strandMeshView = new MeshView(strandMesh);
                 strandMeshView.setMaterial(new PhongMaterial(ColorValue.SHEET.getColor()));
@@ -115,7 +88,13 @@ public class CartoonVisualization extends AbstractModelVisualization {
         }
     }
 
-    private float[] extractPoints(Strand strand) {  // TODO: copy pasted from Ribbon
+    /**
+     * extract points for the triangle mesh of a specific strand
+     *
+     * @param strand strand to be displayed as triangle mesh
+     * @return points of the triangle mesh
+     */
+    private float[] extractPoints(Strand strand) {
         List<Float> points = new ArrayList<>();
         Integer startResID = strand.getInitResidue().getId();
         Integer endResID = strand.getEndResidue().getId();
@@ -126,6 +105,12 @@ public class CartoonVisualization extends AbstractModelVisualization {
         return toFloatArray(points);
     }
 
+    /**
+     * generate triangles of the triangle mesh of a specific strand
+     *
+     * @param strand strand to be displayed as triangle mesh
+     * @return faces of the triangle mesh
+     */
     private int[] generateFaces(Strand strand) {
         List<Integer> faces = new ArrayList<>();
         List<Integer> residueIDs = new ArrayList<>(mapResIdToAtomToIndex.keySet());
@@ -143,6 +128,13 @@ public class CartoonVisualization extends AbstractModelVisualization {
         return toIntArray(faces);
     }
 
+    /**
+     * extract all points of a specific for a triangle mesh
+     *
+     * @param points already extracted points
+     * @param residue residue
+     * @return points
+     */
     private List<Float> extractPointsOfResidue(List<Float> points, Residue residue) {
         mapResIdToAtomToIndex.put(residue.getId(), new HashMap<>());
         points = extractPointsOfAtom(points, residue.getAtom(AtomName.CARBON_ALPHA), residue.getId());
@@ -155,6 +147,14 @@ public class CartoonVisualization extends AbstractModelVisualization {
 
     }
 
+    /**
+     * extract points of a specific atom for a triangle mesh
+     *
+     * @param points already extracted points
+     * @param atom atom
+     * @param residueID ID of the residue to which the atom belongs
+     * @return points
+     */
     private List<Float> extractPointsOfAtom(List<Float> points, Atom atom, Integer residueID) {
         points.add((float) atom.getX());
         mapResIdToAtomToIndex.get(residueID).put(atom.getName(), (points.size() - 1) / 3);
@@ -163,28 +163,9 @@ public class CartoonVisualization extends AbstractModelVisualization {
         return points;
     }
 
-    private Atom createPseudoAtom(Residue residue) {
-        Atom atomCA = residue.getAtom(AtomName.CARBON_ALPHA);
-        Atom atomN = residue.getAtom(AtomName.NITROGEN);
-        Atom atomC = residue.getAtom(AtomName.CARBON);
-        Point3D directionCN = new Point3D(
-                atomCA.getX() - atomN.getX(),
-                atomCA.getY() - atomN.getY(),
-                atomCA.getZ() - atomN.getZ()
-        );
-        Point3D directionCC = new Point3D(
-                atomC.getX() - atomCA.getX(),
-                atomC.getY() - atomCA.getY(),
-                atomC.getZ() - atomCA.getZ()
-        );
-        Point3D normal = directionCN.crossProduct(directionCC).normalize().multiply(CC_BOND_LENGTH);
-        Atom pseudoAtom = new Atom(-1, "CB", "pseudo");
-        pseudoAtom.setX(atomCA.getX() + normal.getX());
-        pseudoAtom.setY(atomCA.getY() + normal.getY());
-        pseudoAtom.setZ(atomCA.getZ() + normal.getZ());
-        return pseudoAtom;
-    }
-
+    /**
+     * create loops as lines between CAs of neighbouring residues
+     */
     private void createLoops() {
         loops = new ArrayList<>();
         loopGroup = new Group();
@@ -210,11 +191,6 @@ public class CartoonVisualization extends AbstractModelVisualization {
                 }
             }
         }
-
-    }
-
-    @Override
-    void createTopGroup() {
 
     }
 }

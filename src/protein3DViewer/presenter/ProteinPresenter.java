@@ -6,7 +6,6 @@ import javafx.animation.ScaleTransition;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -22,7 +21,7 @@ import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import protein3DViewer.*;
 import protein3DViewer.model.Atom;
-import protein3DViewer.model.Helix;
+import protein3DViewer.model.AtomName;
 import protein3DViewer.model.Protein;
 import protein3DViewer.view.*;
 import protein3DViewer.view.atomView.AbstractAtomView;
@@ -42,10 +41,11 @@ public class ProteinPresenter {
 
     private ProteinView proteinView;
     private Protein protein;
-    private String blastFirstAlignment;
 
     private ModelPresenter modelPresenter;
     private SequencePresenter sequencePresenter;
+
+    private String blastFirstAlignment;
 
     public ProteinPresenter(ProteinView proteinView, Protein protein) {
         this.proteinView = proteinView;
@@ -54,10 +54,12 @@ public class ProteinPresenter {
         this.sequencePresenter = proteinView.getSequencePresenter();
         setUpMenuBar();
         setUpToolBar();
-        initSelectedItemsListener();
     }
 
-    public void reset() { // TODO implement
+    /**
+     * reset protein view as well as model and sequence presenter
+     */
+    public void reset() {
         proteinView.getAtomSizeSlider().setValue(0);
         proteinView.getBondSizeSlider().setValue(0);
         proteinView.getVisualizeSticks().setSelected(true);
@@ -66,13 +68,13 @@ public class ProteinPresenter {
         proteinView.reset(protein);
         modelPresenter = proteinView.getModelPresenter();
         sequencePresenter = proteinView.getSequencePresenter();
-        initSelectedItemsListener();
-        // TODO blast first alignment and other reset
     }
-
 
     private void setUpMenuBar() {
 
+        /**
+         * clear current view and load new pdb file
+         */
         proteinView.getMenuOpen().setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -106,46 +108,6 @@ public class ProteinPresenter {
 
             }
         });
-
-//        proteinView.getMenuIncreaseAtomSize().setOnAction(new EventHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent event) {
-//                event.consume();
-//                if (proteinView.getVisualizeSticks().isSelected()) {
-//                    handleChangeAtomSize(0.1);
-//                }
-//            }
-//        });
-//
-//        proteinView.getMenuDecreaseAtomSize().setOnAction(new EventHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent event) {
-//                event.consume();
-//                if (proteinView.getVisualizeSticks().isSelected()) {
-//                    handleChangeAtomSize(-0.1);
-//                }
-//            }
-//        });
-//
-//        proteinView.getMenuIncreaseBondSize().setOnAction(new EventHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent event) {
-//                event.consume();
-//                if (proteinView.getVisualizeSticks().isSelected()) {
-//                    handleChangeBondSize(0.1);
-//                }
-//            }
-//        });
-//
-//        proteinView.getMenuDecreaseBondSize().setOnAction(new EventHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent event) {
-//                event.consume();
-//                if (proteinView.getVisualizeSticks().isSelected()) {
-//                    handleChangeBondSize(-0.1);
-//                }
-//            }
-//        });
 
         proteinView.getMenuColorBySingleColor().selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
@@ -187,34 +149,50 @@ public class ProteinPresenter {
             }
         });
 
+        /**
+         * customize color of selected atoms
+         */
         proteinView.getMenuColorSelectedAtoms().setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 event.consume();
-                ColorPicker colorPicker = new ColorPicker();
-                Alert alert = new Alert(Alert.AlertType.NONE);
-                alert.setTitle("Choose Color of Selected Atoms");
-                ButtonType buttonApply = new ButtonType("Apply", ButtonBar.ButtonData.APPLY);
-                ButtonType buttonClose = new ButtonType("Close", ButtonBar.ButtonData.CANCEL_CLOSE);
-                alert.getButtonTypes().setAll(buttonApply, buttonClose);
-                BorderPane pane = new BorderPane();
-                pane.setCenter(colorPicker);
-                alert.getDialogPane().setContent(pane);
-                Optional<ButtonType> result = alert.showAndWait();
+                SticksVisualization sticksVisualization = (SticksVisualization) proteinView.getModelView().getModelVisualization(VisualizationMode.STICKS);
+                if (sticksVisualization.getResidueSelectionModel().getSelectedItems().size() + sticksVisualization.getAtomSelectionModel().getSelectedItems().size() > 0) {
+                    Alert alert = new Alert(Alert.AlertType.NONE);
+                    alert.setTitle("Choose Color of Selected Atoms");
+                    ButtonType buttonApply = new ButtonType("Apply", ButtonBar.ButtonData.APPLY);
+                    ButtonType buttonClose = new ButtonType("Close", ButtonBar.ButtonData.CANCEL_CLOSE);
+                    alert.getButtonTypes().setAll(buttonApply, buttonClose);
 
-                if (result.get() == buttonApply) {
-                    Color pickedColor = colorPicker.getValue();
-                    SticksVisualization sticksVisualization = (SticksVisualization) proteinView.getModelView().getModelVisualization(VisualizationMode.STICKS);
-                    for (AbstractAtomView atomView: sticksVisualization.getSelectionModel().getSelectedItems()) {
-                        atomView.setColor(pickedColor);
+                    BorderPane pane = new BorderPane();
+                    ColorPicker colorPicker = new ColorPicker();
+                    pane.setCenter(colorPicker);
+
+                    alert.getDialogPane().setContent(pane);
+                    Optional<ButtonType> result = alert.showAndWait();
+
+                    if (result.get() == buttonApply) {
+                        Color pickedColor = colorPicker.getValue();
+                        for (AbstractAtomView atomView: sticksVisualization.getResidueSelectionModel().getSelectedItems()) {
+                            atomView.setColor(pickedColor);
+                        }
+                        for (AbstractAtomView atomView: sticksVisualization.getAtomSelectionModel().getSelectedItems()) {
+                            atomView.setColor(pickedColor);
+                        }
                     }
-                    for (AbstractAtomView atomView: sticksVisualization.getDistanceSelectionModel().getSelectedItems()) {
-                        atomView.setColor(pickedColor);
-                    }
+                } else {
+                    final Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setHeaderText("No atoms selected.");
+                    alert.setContentText("Please select the atoms and/or residues you want to color.");
+                    alert.showAndWait();
                 }
+
             }
         });
 
+        /**
+         * change default color and save preferences
+         */
         proteinView.getMenuChangeDefaultColors().setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -227,13 +205,17 @@ public class ProteinPresenter {
 
                 BorderPane pane = new BorderPane();
                 VBox box = new VBox(10);
+
+                // display drop-down menu for the colors that can be changed
                 ChoiceBox<ColorValue> chooseColoring = new ChoiceBox<>(FXCollections.observableArrayList(ColorValue.values()));
                 chooseColoring.setValue(ColorValue.DEFAULT);
                 chooseColoring.setMaxWidth(Double.MAX_VALUE);
 
+                // display color picker
                 ColorPicker colorPicker = new ColorPicker(ColorValue.DEFAULT.getColor());
                 colorPicker.setMaxWidth(Double.MAX_VALUE);
 
+                // set default value of color picker according to current displayed color
                 chooseColoring.valueProperty().addListener(new ChangeListener<ColorValue>() {
                     @Override
                     public void changed(ObservableValue<? extends ColorValue> observable, ColorValue oldValue, ColorValue newValue) {
@@ -246,15 +228,19 @@ public class ProteinPresenter {
 
                 alert.getDialogPane().setContent(pane);
                 Optional<ButtonType> result = alert.showAndWait();
+
+                // save the change made and update current view according to the new color picked
                 if (result.get() == buttonApply) {
-                    Color pickedColor = colorPicker.getValue();
-                    chooseColoring.getValue().setColor(pickedColor);
+                    chooseColoring.getValue().setColor(colorPicker.getValue());
                     changeColorOfCurrentView(chooseColoring.getValue());
                 }
 
             }
         });
 
+        /**
+         * reset every colors to its default value
+         */
         proteinView.getMenuResetToDefaultColors().setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -268,6 +254,9 @@ public class ProteinPresenter {
             }
         });
 
+        /**
+         * call BLAST webservice
+         */
         proteinView.getMenuRunBlast().setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
@@ -276,6 +265,7 @@ public class ProteinPresenter {
                 Label blastLabel = new Label("BLAST running...");
                 ProgressIndicator progressIndicator = new ProgressIndicator();
                 proteinView.getToolBar().getItems().addAll(separator, blastLabel, progressIndicator);
+
                 BlastService blastService = new BlastService();
                 blastService.setSequence(protein.getSeqResRecord().generateAminoAcidSequence());
                 blastService.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
@@ -290,11 +280,12 @@ public class ProteinPresenter {
 
                         final Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                         alert.setTitle("BLAST Results");
-                        alert.setHeaderText("BLAST results are ready");
+                        alert.setHeaderText("The BLAST results are ready.");
                         alert.setContentText("Do you want to view them now?");
                         ButtonType buttonYes = new ButtonType("Yes");
                         ButtonType buttonLater = new ButtonType("Later", ButtonBar.ButtonData.CANCEL_CLOSE);
                         alert.getButtonTypes().setAll(buttonYes, buttonLater);
+
                         Optional<ButtonType> result = alert.showAndWait();
                         if (result.get() == buttonYes) {
                             proteinView.getMenuShowBlastResults().fire();
@@ -305,6 +296,9 @@ public class ProteinPresenter {
             }
         });
 
+        /**
+         * display the best alignment found by BLAST
+         */
         proteinView.getMenuShowBlastResults().setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -313,23 +307,31 @@ public class ProteinPresenter {
                 alert.setTitle("BLAST Results");
                 ButtonType buttonType = new ButtonType("Close", ButtonBar.ButtonData.CANCEL_CLOSE);
                 alert.getButtonTypes().add(buttonType);
+
                 String firstAlignmentId = blastFirstAlignment.split(" ")[0].substring(1);
                 alert.setHeaderText("Highest scoring result: " + firstAlignmentId);
+
                 TextArea textArea = new TextArea(blastFirstAlignment);
                 textArea.setEditable(false);
                 textArea.setWrapText(true);
                 textArea.setMaxWidth(Double.MAX_VALUE);
                 textArea.setMaxHeight(Double.MAX_VALUE);
+
                 GridPane.setVgrow(textArea, Priority.ALWAYS);
                 GridPane.setHgrow(textArea, Priority.ALWAYS);
+
                 GridPane content = new GridPane();
                 content.setMaxWidth(Double.MAX_VALUE);
                 content.add(textArea, 0, 1);
+
                 alert.getDialogPane().setExpandableContent(content);
                 alert.showAndWait();
             }
         });
 
+        /**
+         * show pie chart on the percentage of different residue types
+         */
         proteinView.getMenuInformationResidueTypes().setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -338,28 +340,22 @@ public class ProteinPresenter {
                 alert.setTitle("Information");
                 ButtonType buttonType = new ButtonType("Close", ButtonBar.ButtonData.CANCEL_CLOSE);
                 alert.getButtonTypes().add(buttonType);
-//                PieChart.Data maxData = proteinView.getPieChartResidueTypes().getData().get(0);
-//                for (PieChart.Data pieChartData: proteinView.getPieChartResidueTypes().getData()) {
-//                    if (pieChartData.getPieValue() > maxData.getPieValue()) {
-//                        maxData = pieChartData;
-//                    }
-//                }
-                DecimalFormat df = new DecimalFormat("#.##");
-//                alert.setHeaderText("Most occurring amino acid: " + maxData.getName() + " (" + df.format(maxData.getPieValue()) + "%)");
+
+
                 GridPane content = new GridPane();
-
-
                 final Label caption = new Label();
                 caption.setTextFill(Color.BLACK);
-                caption.setStyle("-fx-font: 24 arial;");
 
                 content.add(proteinView.getPieChartResidueTypes(), 0, 0);
                 content.add(caption, 0, 1);
                 GridPane.setHalignment(caption, HPos.CENTER);
+
+                // display percentage when mouse is in a field of the pie chart
                 for (PieChart.Data data : proteinView.getPieChartResidueTypes().getData()) {
                     data.getNode().addEventHandler(MouseEvent.MOUSE_ENTERED, new EventHandler<MouseEvent>() {
                         @Override
                         public void handle(MouseEvent e) {
+                            DecimalFormat df = new DecimalFormat("#.##");
                             caption.setText(data.getName() + ": " + df.format(data.getPieValue() * 100) + "%");
                         }
                     });
@@ -371,12 +367,14 @@ public class ProteinPresenter {
                     });
                 }
 
-//                alert.getDialogPane().setExpandableContent(content);
                 alert.getDialogPane().setContent(content);
                 alert.showAndWait();
             }
         });
 
+        /**
+         * show pie chart on the different secondary structure elements present in the protein
+         */
         proteinView.getMenuInformationSecondaryStructure().setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -386,28 +384,27 @@ public class ProteinPresenter {
                 ButtonType buttonType = new ButtonType("Close", ButtonBar.ButtonData.CANCEL_CLOSE);
                 alert.getButtonTypes().add(buttonType);
 
-                String content = "Number of Helices: " + protein.getSecondaryStructure().getHelices().size() + "\n";
-                content += "Helix types: ";
-                for (Helix helix: protein.getSecondaryStructure().getHelices().values()) {
-                    content += helix.getType() + ", ";
-                }
-                content += "\n\nNumber of Sheets: " + protein.getSecondaryStructure().getSheets().size();
-
-//                alert.setContentText(content);
+//                String content = "Number of Helices: " + protein.getSecondaryStructure().getHelices().size() + "\n";
+//                content += "Helix types: ";
+//                for (Helix helix: protein.getSecondaryStructure().getHelices().values()) {
+//                    content += helix.getType() + ", ";
+//                }
+//                content += "\n\nNumber of Sheets: " + protein.getSecondaryStructure().getSheets().size();
 
                 GridPane pane = new GridPane();
                 final Label caption = new Label();
                 caption.setTextFill(Color.BLACK);
-                caption.setStyle("-fx-font: 24 arial;");
-                DecimalFormat df = new DecimalFormat("#.##");
-//                pane.add(new TextField(content), 0, 0);
+
                 pane.add(proteinView.getPieChartSecondaryStructure(), 0, 0);
                 pane.add(caption, 0, 1);
                 GridPane.setHalignment(caption, HPos.CENTER);
+
+                // display percentage when mouse is in a field of the pie chart
                 for (PieChart.Data data : proteinView.getPieChartSecondaryStructure().getData()) {
                     data.getNode().addEventHandler(MouseEvent.MOUSE_ENTERED, new EventHandler<MouseEvent>() {
                         @Override
                         public void handle(MouseEvent e) {
+                            DecimalFormat df = new DecimalFormat("#.##");
                             caption.setText(data.getName() + ": " + df.format(data.getPieValue() * 100) + "%");
                         }
                     });
@@ -418,12 +415,16 @@ public class ProteinPresenter {
                         }
                     });
                 }
+
                 alert.getDialogPane().setContent(pane);
                 alert.showAndWait();
             }
+
         });
 
     }
+
+
 
     private void setUpToolBar() {
 
@@ -442,7 +443,6 @@ public class ProteinPresenter {
             }
         });
 
-        // TODO: should slider position change when size is influences from menu bar?
         proteinView.getAtomSizeSlider().valueProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
@@ -477,6 +477,7 @@ public class ProteinPresenter {
             }
         });
 
+
         proteinView.getVisualizeSticks().selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
@@ -485,16 +486,14 @@ public class ProteinPresenter {
                 proteinView.getAtomSizeSlider().setDisable(!newValue);
                 proteinView.getShowBonds().setDisable(!newValue);
                 proteinView.getBondSizeSlider().setDisable(!newValue);
+                proteinView.getChooseColoring().setDisable(!newValue);
+                proteinView.getMenuColorBy().setDisable(!newValue);
+                proteinView.getCalculateDistanceButton().setDisable(!newValue);
+                proteinView.getMenuColorSelectedAtoms().setDisable(!newValue);
                 if (newValue) {
                     proteinView.getModelView().addVisualization(VisualizationMode.STICKS);
-                    proteinView.getChooseColoring().setDisable(false);
-                    proteinView.getMenuColorBy().setDisable(false);
-                    proteinView.getMenuColorSelectedAtoms().setDisable(true);
                     modelPresenter.setUpAtomViews();
                     proteinView.initCrossLinking();
-                    proteinView.getCalculateDistanceButton().setDisable(false);
-                    initSelectedItemsListener();
-
                 } else {
                     proteinView.getAtomSizeSlider().setValue(0);
                     proteinView.getBondSizeSlider().setValue(0);
@@ -505,9 +504,6 @@ public class ProteinPresenter {
                     proteinView.getMenuColorBySingleColor().setSelected(false);
                     proteinView.getMenuColorBySecondaryStructure().setSelected(false);
                     proteinView.getMenuColorByProperties().setSelected(false);
-                    proteinView.getChooseColoring().setDisable(true);
-                    proteinView.getMenuColorBy().setDisable(true);
-                    proteinView.getCalculateDistanceButton().setDisable(true);
                     proteinView.getModelView().removeVisualization(VisualizationMode.STICKS);
                 }
             }
@@ -535,6 +531,9 @@ public class ProteinPresenter {
             }
         });
 
+        /**
+         * visualize atoms by different modes
+         */
         proteinView.getChooseColoring().valueProperty().addListener(new ChangeListener<ColorMode>() {
             @Override
             public void changed(ObservableValue<? extends ColorMode> observable, ColorMode oldValue, ColorMode newValue) {
@@ -554,75 +553,72 @@ public class ProteinPresenter {
             }
         });
 
+        /**
+         * calculate distance between two selected atoms and/or
+         * the distance of the CA-atoms of two residues
+         */
         proteinView.getCalculateDistanceButton().setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-
                     SticksVisualization sticksVisualization = (SticksVisualization) proteinView.getModelView().getModelVisualization(VisualizationMode.STICKS);
-                    if (sticksVisualization.getDistanceSelectionModel().getSelectedItems().size() == 2) {
-                        AbstractAtomView atomView1 = sticksVisualization.getDistanceSelectionModel().getSelectedItems().get(0);
-                        AbstractAtomView atomView2 = sticksVisualization.getDistanceSelectionModel().getSelectedItems().get(1);
-
-                        Line connection = new Line(atomView1.getX(), atomView1.getY(), atomView1.getZ(),
-                                atomView2.getX(), atomView2.getY(), atomView2.getZ()
-                        );
-                        connection.setMaterial(new PhongMaterial(Color.BLACK));
-                        sticksVisualization.getConnectionGroup().getChildren().add(connection);
-
-                        Point3D start = new Point3D(connection.getStartX(), connection.getStartY(), connection.getStartZ());
-                        Point3D end = new Point3D(connection.getEndX(), connection.getEndY(), connection.getEndZ());
-                        Point3D midPoint = end.midpoint(start);
-                        Atom pseudoAtom = new Atom(-1, "", "");
-                        pseudoAtom.setX(midPoint.getX());
-                        pseudoAtom.setY(midPoint.getY());
-                        pseudoAtom.setZ(midPoint.getZ());
-                        AbstractAtomView pseudo = new CarbonView(pseudoAtom);
-                        pseudo.setVisible(false);
-                        sticksVisualization.getPseudoGroup().getChildren().add(pseudo);
-
-                        DecimalFormat df = new DecimalFormat("#.##");
-                        AtomLabel distanceLabel = new AtomLabel(pseudo, proteinView.getModelView().getBottomPane(), proteinView.getModelView().getBottomGroup().worldTransformProperty(),
-                                df.format(Math.abs(end.subtract(start).magnitude())) + "A");
-                        proteinView.getModelView().getTopPane().getChildren().add(distanceLabel);
+                    if (sticksVisualization.getAtomSelectionModel().getSelectedItems().size() == 2
+                            || sticksVisualization.getResidueSelectionModel().getSelectedItems().size() >= 8
+                            && sticksVisualization.getResidueSelectionModel().getSelectedItems().size() <= 10) {
+                        if (sticksVisualization.getAtomSelectionModel().getSelectedItems().size() == 2) {
+                            AbstractAtomView atomView1 = sticksVisualization.getAtomSelectionModel().getSelectedItems().get(0);
+                            AbstractAtomView atomView2 = sticksVisualization.getAtomSelectionModel().getSelectedItems().get(1);
+                            visualizeDistance(atomView1, atomView2);
+                        }
+                        if (sticksVisualization.getResidueSelectionModel().getSelectedItems().size() >= 8 && sticksVisualization.getResidueSelectionModel().getSelectedItems().size() <= 10) {
+                            // extract the two CA-atoms selected
+                            AbstractAtomView[] atomViews = new AbstractAtomView[2];
+                            int i = 0;
+                            for (AbstractAtomView atomView: sticksVisualization.getResidueSelectionModel().getSelectedItems()) {
+                                if (atomView.getAtom().getName() == AtomName.CARBON_ALPHA) {
+                                    atomViews[i++] = atomView;
+                                }
+                            }
+                            visualizeDistance(atomViews[0], atomViews[1]);
+                        }
                     } else {
                         final Alert alert = new Alert(Alert.AlertType.ERROR);
                         alert.setHeaderText("Distance can't be calculated.");
-                        alert.setContentText("Please select exactly two atoms.");
+                        alert.setContentText("Please select either exactly two atoms or exactly two residues.");
                         alert.showAndWait();
                     }
                 }
 
-            });
+            private void visualizeDistance(AbstractAtomView atomView1, AbstractAtomView atomView2) {
+                SticksVisualization sticksVisualization = (SticksVisualization) proteinView.getModelView().getModelVisualization(VisualizationMode.STICKS);
 
+                // connect atoms by a line
+                Line connection = new Line(atomView1.getX(), atomView1.getY(), atomView1.getZ(),
+                        atomView2.getX(), atomView2.getY(), atomView2.getZ()
+                );
+                connection.setMaterial(new PhongMaterial(Color.BLACK));
+                sticksVisualization.getConnectionGroup().getChildren().add(connection);
 
-    }
+                // create a pseudo atom view in the middle of the line
+                Point3D start = new Point3D(connection.getStartX(), connection.getStartY(), connection.getStartZ());
+                Point3D end = new Point3D(connection.getEndX(), connection.getEndY(), connection.getEndZ());
+                Point3D midPoint = end.midpoint(start);
+                Atom pseudoAtom = new Atom(-1, "", "");
+                pseudoAtom.setX(midPoint.getX());
+                pseudoAtom.setY(midPoint.getY());
+                pseudoAtom.setZ(midPoint.getZ());
+                AbstractAtomView pseudo = new CarbonView(pseudoAtom);
+                pseudo.setVisible(false);
+                sticksVisualization.getPseudoGroup().getChildren().add(pseudo);
 
-    private void initSelectedItemsListener() {
-        SticksVisualization sticksVisualization = (SticksVisualization) proteinView.getModelView().getModelVisualization(VisualizationMode.STICKS);
-        sticksVisualization.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<AbstractAtomView>() {
-            @Override
-            public void onChanged(Change<? extends AbstractAtomView> c) {
-                while (c.next()) {
-                    if (sticksVisualization.getSelectionModel().getSelectedItems().size() > 0 || sticksVisualization.getDistanceSelectionModel().getSelectedItems().size() > 0) {
-                        proteinView.getMenuColorSelectedAtoms().setDisable(false);
-                    } else {
-                        proteinView.getMenuColorSelectedAtoms().setDisable(true);
-                    }
-                }
+                // create label with distance bound to the pseudo atom
+                DecimalFormat df = new DecimalFormat("#.##");
+                AtomLabel distanceLabel = new AtomLabel(pseudo, proteinView.getModelView().getBottomPane(), proteinView.getModelView().getBottomGroup().worldTransformProperty(),
+                        df.format(Math.abs(end.subtract(start).magnitude())) + "A");
+                proteinView.getModelView().getTopPane().getChildren().add(distanceLabel);
             }
+
         });
-        sticksVisualization.getDistanceSelectionModel().getSelectedItems().addListener(new ListChangeListener<AbstractAtomView>() {
-            @Override
-            public void onChanged(Change<? extends AbstractAtomView> c) {
-                while (c.next()) {
-                    if (sticksVisualization.getSelectionModel().getSelectedItems().size() > 0 || sticksVisualization.getDistanceSelectionModel().getSelectedItems().size() > 0) {
-                        proteinView.getMenuColorSelectedAtoms().setDisable(false);
-                    } else {
-                        proteinView.getMenuColorSelectedAtoms().setDisable(true);
-                    }
-                }
-            }
-        });
+
     }
 
     private void handleChangeAtomSize(Double factor) {
@@ -637,33 +633,39 @@ public class ProteinPresenter {
     }
 
     private void handleColorBySingleColor() {
-        if (proteinView.getVisualizeSticks().isSelected()) {  // TODO: right now only for sticks available
+        if (proteinView.getVisualizeSticks().isSelected()) {
             SticksVisualization sticksVisualization = (SticksVisualization) proteinView.getModelView().getModelVisualization(VisualizationMode.STICKS);
             sticksVisualization.changeAtomColor(ColorMode.UNICOLOR);
         }
     }
 
     private void handleColorByAminoAcid() {
-        if (proteinView.getVisualizeSticks().isSelected()) {  // TODO: right now only for sticks available
+        if (proteinView.getVisualizeSticks().isSelected()) {
             SticksVisualization sticksVisualization = (SticksVisualization) proteinView.getModelView().getModelVisualization(VisualizationMode.STICKS);
             sticksVisualization.changeAtomColor(ColorMode.BY_ATOM_TYPE);
         }
     }
 
     private void handleColorBySecondaryStructure() {
-        if (proteinView.getVisualizeSticks().isSelected()) {  // TODO: right now only for sticks available
+        if (proteinView.getVisualizeSticks().isSelected()) {
             SticksVisualization sticksVisualization = (SticksVisualization) proteinView.getModelView().getModelVisualization(VisualizationMode.STICKS);
             sticksVisualization.changeAtomColor(ColorMode.BY_SECONDARY_STRUCTURE);
         }
     }
 
     private void handleColorByProperties() {
-        if (proteinView.getVisualizeSticks().isSelected()) {   // TODO: right now only for sticks available
+        if (proteinView.getVisualizeSticks().isSelected()) {
             SticksVisualization sticksVisualization = (SticksVisualization) proteinView.getModelView().getModelVisualization(VisualizationMode.STICKS);
             sticksVisualization.changeAtomColor(ColorMode.BY_PROPERTIES);
         }
     }
 
+    /**
+     * after setting a new color, update the current view according to the
+     * the chosen color
+     *
+     * @param changedColorValue color value that got changed by the user
+     */
     private void changeColorOfCurrentView(ColorValue changedColorValue) {
         switch (changedColorValue) {  //TODO
             case DEFAULT:

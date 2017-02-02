@@ -18,17 +18,16 @@ public enum ColorValue {
     POSITIVE_CHARGED(Color.ORANGERED),
     NEGATIVE_CHARGED(Color.NAVAJOWHITE);
 
+    // default color
     private Color defaultColor;
+
+    // currently displayed color
     private Color color;
 
     ColorValue(Color defaultColor) {
         this.defaultColor = defaultColor;
         this.color = defaultColor;
     }
-
-//    public Color getColor() {
-//        return defaultColor;
-//    }
 
     public Color getColor() {
         return color;
@@ -55,6 +54,9 @@ public enum ColorValue {
         }
     }
 
+    /**
+     * reset all colors to its default
+     */
     public static void reset() {
         for (ColorValue colorValue: ColorValue.values()) {
             colorValue.color = colorValue.defaultColor;

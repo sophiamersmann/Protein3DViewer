@@ -16,6 +16,7 @@ public class Director {
         protein.setId(p.idCode);
         protein.setName(p.title);
 
+        // set 3D model of the protein
         Model model = new Model(1);
         model.setProtein(protein);
         for (Integer atomID : p.atomNames.keySet()) {
@@ -39,6 +40,7 @@ public class Director {
         }
         protein.setModel(model);
 
+        // set primary sequence of the protein
         SeqResRecord seqResRecord = new SeqResRecord();
         seqResRecord.setProtein(protein);
         for (Map.Entry<Character, List<String>> entry : p.seqResRecord.entrySet()) {
@@ -52,6 +54,7 @@ public class Director {
         }
         protein.setSeqResRecord(seqResRecord);
 
+        // set secondary structure of the protein
         SecondaryStructure secondaryStructure = new SecondaryStructure();
         secondaryStructure.setProtein(protein);
         protein.setSecondaryStructure(secondaryStructure);
@@ -95,7 +98,6 @@ public class Director {
 
     private static Residue findModelResidue(Chain chain, Integer resNum, String resName3) {
         if (!chain.getResidues().containsKey(resNum)) {
-            System.err.println("Residue does not exist in ATOM record.");
             Residue residue = new Residue(resNum, resName3);
             residue.setChain(chain);
             return residue;

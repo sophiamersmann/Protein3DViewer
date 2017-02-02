@@ -24,6 +24,11 @@ public class BondView extends Group {
         getChildren().add(line);
     }
 
+    /**
+     * increase/decrease bond size
+     *
+     * @param factor factor by which bond size is changed
+     */
     public void changeRadius(Double factor) {
         line.setRadius(line.getRadius() + factor);
     }

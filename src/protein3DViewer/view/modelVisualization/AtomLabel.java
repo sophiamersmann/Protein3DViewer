@@ -29,7 +29,6 @@ public class AtomLabel extends Label {
         setText(text);
         setTextFill(Color.BLACK);
         setMouseTransparent(true);
-        setStyle("-fx-font-weight: bold");
         setBackground(new Background(new BackgroundFill(Color.LIGHTGRAY, CornerRadii.EMPTY, new Insets(0))));
     }
 
@@ -40,7 +39,6 @@ public class AtomLabel extends Label {
                 bind(worldTransform);
                 bind(atomView.translateXProperty(), atomView.translateYProperty());
                 bind(atomView.scaleXProperty(), atomView.scaleYProperty());
-//                bind(pane.widthProperty(), pane.heightProperty());
                 final Bounds boundsOnScreen = atomView.localToScreen(atomView.getBoundsInLocal());
                 final Bounds paneBoundsOnScreen = pane.localToScreen(pane.getBoundsInLocal());
                 final double xInScene = boundsOnScreen.getMinX() - paneBoundsOnScreen.getMinX();
@@ -48,7 +46,6 @@ public class AtomLabel extends Label {
                 Label label = new Label();
                 label.setTranslateX(xInScene);
                 label.setTranslateY(yInScene);
-//                label.setPrefSize(boundsOnScreen.getWidth(), boundsOnScreen.getHeight());
                 return label;
             }
         };
@@ -96,24 +93,5 @@ public class AtomLabel extends Label {
             }
         });
 
-//        prefWidthProperty().bind(new DoubleBinding() {
-//            {
-//                bind(binding);
-//            }
-//            @Override
-//            protected double computeValue() {
-//                return binding.get().getWidth();
-//            }
-//        });
-//
-//        prefHeightProperty().bind(new DoubleBinding() {
-//            {
-//                bind(binding);
-//            }
-//            @Override
-//            protected double computeValue() {
-//                return binding.get().getHeight();
-//            }
-//        });
     }
 }

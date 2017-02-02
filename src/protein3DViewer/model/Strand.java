@@ -13,7 +13,7 @@ public class Strand {
     private Residue endResidue;
 
     /**
-     * tells if a given residue lies within the strand
+     * returns true, if a given residue lies within the strand
      *
      * @param residue
      * @return true, if the given residue is part of the strand

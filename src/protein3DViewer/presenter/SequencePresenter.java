@@ -3,13 +3,10 @@ package protein3DViewer.presenter;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.paint.Color;
 import protein3DViewer.MySelectionModel;
 import protein3DViewer.model.SeqResRecord;
-import protein3DViewer.view.ColorMode;
 import protein3DViewer.view.SelectableLabel;
 import protein3DViewer.view.SequenceView;
 import protein3DViewer.view.VisualizationMode;
@@ -29,9 +26,6 @@ public class SequencePresenter {
     private SequenceView sequenceView;
 
     private List<SelectableLabel> residueViews;
-//    private MySelectionModel<SelectableLabel> selectionModelResidueSeq;
-//
-//    private MySelectionModel<SelectableLabel> selectionModelAnnotationSeq;
 
     public SequencePresenter(ModelPresenter modelPresenter, SequenceView sequenceView, SeqResRecord seqResRecord) {
         this.modelPresenter = modelPresenter;
@@ -41,6 +35,9 @@ public class SequencePresenter {
         setUpSecondaryStructureAnnotations();
     }
 
+    /**
+     * set up labels for the SeqRes record sequence
+     */
     private void setUpResidueViews() {
         residueViews = new ArrayList<>(sequenceView.getResidueViews().values());
         for (SelectableLabel label: residueViews) {
@@ -48,6 +45,9 @@ public class SequencePresenter {
         }
     }
 
+    /**
+     * set up labels annotating each residue by its secondary structure
+     */
     private void setUpSecondaryStructureAnnotations() {
         for (SelectableLabel label: sequenceView.getSecondaryStructureAnnotations()) {
             setUpSelectableLabel(label, sequenceView.getSecondaryStructureAnnotations(), sequenceView.getSelectionModelAnnotationSeq());
@@ -55,7 +55,15 @@ public class SequencePresenter {
         }
     }
 
+    /**
+     * make a selectable label clickable
+     *
+     * @param label the label
+     * @param labels list of labels containing the given label
+     * @param selectionModel corresponding selection model
+     */
     private void setUpSelectableLabel(SelectableLabel label, List<SelectableLabel> labels, MySelectionModel selectionModel) {
+
         label.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -66,7 +74,7 @@ public class SequencePresenter {
                     label.setSelected(!label.isSelected());
                     int atomID = (int) label.getResidue().getAtoms().keySet().toArray()[0];
                     SticksVisualization sticksVis = (SticksVisualization) modelPresenter.getModelView().getModelVisualization(VisualizationMode.STICKS);
-                    modelPresenter.selectAllAtomsOfResidue(sticksVis.getAtomViews().get(atomID));
+                    modelPresenter.shiftSelectAllAtomViewsOfResidue(sticksVis.getAtomViews().get(atomID));
                 }
             }
         });

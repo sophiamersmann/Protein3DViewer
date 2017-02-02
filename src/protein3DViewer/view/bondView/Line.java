@@ -30,15 +30,15 @@ public class Line extends Cylinder {
         this.endY = new SimpleDoubleProperty(endY);
         this.endZ = new SimpleDoubleProperty(endZ);
 
-        PhongMaterial material = new PhongMaterial();
-        material.setDiffuseColor(Color.WHITE);
-        material.setSpecularColor(Color.BLACK);
-        setMaterial(material);
+        setMaterial(new PhongMaterial(Color.WHITE));
 
         createLine();
         setUpListeners();
     }
 
+    /**
+     * translate cylinder into a proper line with start and end coordinates
+     */
     private void createLine() {
         Point3D startPoint = new Point3D(startX.get(), startY.get(), startZ.get());
         Point3D endPoint = new Point3D(endX.get(), endY.get(), endZ.get());

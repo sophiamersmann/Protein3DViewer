@@ -37,16 +37,12 @@ public class ModelView extends Group {
     private SubScene subScene;
     private Camera camera;
 
-//    private final Property<Transform> modelTransform = new SimpleObjectProperty<>(new Rotate());
-
     private Map<VisualizationMode, AbstractModelVisualization> modelVisualizations = new HashMap<>();
 
     private final static VisualizationMode INITIAL_VISUALIZATION_MODE = VisualizationMode.STICKS;
 
     public ModelView(Model model) {
         this.model = model;
-//        stackPane.setPrefSize(1500, 1500);
-//        initModelTransformListener();
         init3DView();
         adjustProteinPosition();
         topPane.setPickOnBounds(false);
@@ -55,76 +51,57 @@ public class ModelView extends Group {
         getChildren().addAll(stackPane);
     }
 
-
+    /**
+     * move protein to the center of the camera
+     */
     private void adjustProteinPosition() {
-        double minX = Double.POSITIVE_INFINITY, maxX = Double.NEGATIVE_INFINITY;
-        double minY = Double.POSITIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY;
-        double minZ = Double.POSITIVE_INFINITY, maxZ = Double.NEGATIVE_INFINITY;
-        for (Chain chain: model.getChains().values()) {
-            for (Residue residue: chain.getResidues().values()) {
-                for (Atom atom: residue.getAtoms().values()) {
-                    if (atom.getX() < minX) {
-                        minX = atom.getX();
-                    }
-                    if (atom.getX() > maxX) {
-                        maxX = atom.getX();
-                    }
-                    if (atom.getY() < minY) {
-                        minY = atom.getY();
-                    }
-                    if (atom.getY() > maxY) {
-                        maxY = atom.getY();
-                    }
-                    if (atom.getZ() < minZ) {
-                        minZ = atom.getZ();
-                    }
-                    if (atom.getZ() > maxZ) {
-                        maxZ = atom.getZ();
-                    }
-                }
-            }
-        }
-        double centerX = 0.5 * (minX + maxX);
-        double centerY = 0.5 * (minY + maxY);
-        double centerZ = 0.5 * (minZ + maxZ);
-        double offsetX = camera.getTranslateX() - centerX;
-        double offsetY = camera.getTranslateY() - centerY;
-        double offsetZ = camera.getTranslateZ() - centerZ;
+        // calculate offset to camera position
+        double offsetX = calculateOffset("X");
+        double offsetY = calculateOffset("Y");
+        // move each atom by offset
         for (Chain chain: model.getChains().values()) {
             for (Residue residue: chain.getResidues().values()) {
                 for (Atom atom: residue.getAtoms().values()) {
                     atom.setX(atom.getX() + offsetX);
                     atom.setY(atom.getY() + offsetY);
-//                    atom.setZ(atom.getZ() + offsetZ);
                 }
             }
         }
     }
 
-//    private void initModelTransformListener() {
-//        modelTransform.addListener((observable, oldValue, newValue) -> {
-//            this.getTransforms().setAll(newValue);
-//        });
-//    }
+    /**
+     * calculate offset to the camera
+     *
+     * @param mode either X or Y
+     * @return offset in X or Y direction
+     */
+    private double calculateOffset(String mode) {
+        double min = Double.POSITIVE_INFINITY, max = Double.NEGATIVE_INFINITY;
+        for (Chain chain: model.getChains().values()) {
+            for (Residue residue: chain.getResidues().values()) {
+                for (Atom atom: residue.getAtoms().values()) {
+                    double value = mode.equalsIgnoreCase("X") ? atom.getX() : atom.getY();
+                    if (value < min) {
+                        min = value;
+                    }
+                    if (value > max) {
+                        max = value;
+                    }
+                }
+            }
+        }
+        double center = 0.5 * (min + max);
+        return mode.equalsIgnoreCase("X") ? (camera.getTranslateX() - center) : (camera.getTranslateY() - center);
+    }
 
+    /**
+     * set up sub scene and camera
+     */
     private void init3DView() {
         subScene = new SubScene(bottomGroup, 1000, 1000, true, SceneAntialiasing.BALANCED);  // TODO: hard coded right now
-//        subScene.setFill(Color.LIGHTGREY);
         subScene.widthProperty().bind(stackPane.widthProperty());
         subScene.heightProperty().bind(stackPane.heightProperty());
         camera = new PerspectiveCamera(true);
-//        subScene.widthProperty().addListener(new ChangeListener<Number>() {
-//            @Override
-//            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-//                camera.setTranslateX(0.5 * (double) newValue);
-//            }
-//        });
-//        subScene.heightProperty().addListener(new ChangeListener<Number>() {
-//            @Override
-//            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-//                camera.setTranslateY(0.5 * (double) newValue);
-//            }
-//        });
         camera.setNearClip(0.1);
         camera.setFarClip(Double.MAX_VALUE);
         camera.setTranslateZ(-100);
@@ -132,23 +109,32 @@ public class ModelView extends Group {
         bottomPane.getChildren().add(subScene);
     }
 
+    /**
+     * add visualization to the current view
+     *
+     * @param visualizationMode visualization mode
+     */
     public void addVisualization(VisualizationMode visualizationMode) {
         modelVisualizations.put(visualizationMode, ModelVisualizationFactory.createModelVisualization(model, this, visualizationMode));
-//        bottomPane.getChildren().add(modelVisualizations.get(visualizationMode).getBottomGroup());
         bottomGroup.getChildren().add(modelVisualizations.get(visualizationMode).getBottomGroup());
-        topPane.getChildren().add(modelVisualizations.get(visualizationMode).getTopGroup());
     }
 
+    /**
+     * remove visualization from the current view
+     *
+     * @param visualizationMode visualization mode
+     */
     public void removeVisualization(VisualizationMode visualizationMode) {
         modelVisualizations.get(visualizationMode).getBottomGroup().getChildren().clear();
         if (visualizationMode == VisualizationMode.STICKS) {
             topPane.getChildren().clear();
-            SticksVisualization sticksVisualization = (SticksVisualization) modelVisualizations.get(VisualizationMode.STICKS);
-            sticksVisualization.getAtomViews().values().forEach(abstractAtomView -> abstractAtomView.setSelected(false));
-            sticksVisualization.getAtomViews().values().forEach(abstractAtomView -> abstractAtomView.setShiftSelected(false));
+            ((SticksVisualization) modelVisualizations.get(VisualizationMode.STICKS)).clearSelection();
         }
     }
 
+    /**
+     * remove all visualization modes
+     */
     public void clear() {
         for (VisualizationMode visualizationMode: modelVisualizations.keySet()) {
             removeVisualization(visualizationMode);
@@ -171,13 +157,6 @@ public class ModelView extends Group {
         return bottomPane;
     }
 
-//    public Transform getWorldTransform() {
-//        return modelTransform.getValue();
-//    }
-//
-//    public Property<Transform> worldTransformProperty() {
-//        return modelTransform;
-//    }
 
     public Map<VisualizationMode, AbstractModelVisualization> getModelVisualizations() {
         return modelVisualizations;

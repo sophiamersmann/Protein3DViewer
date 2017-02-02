@@ -8,6 +8,12 @@ import protein3DViewer.model.AtomName;
  */
 public class AtomViewFactory {
 
+    /**
+     * create atom view for a specific atom
+     *
+     * @param atom atom for which atom view is to be created
+     * @return atom view
+     */
     public static AbstractAtomView createAtomView(Atom atom) {
         if (atom.getName() == AtomName.NITROGEN) {
             return new NitrogenView(atom);

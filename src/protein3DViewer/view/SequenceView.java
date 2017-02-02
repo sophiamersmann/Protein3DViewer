@@ -65,13 +65,11 @@ public class SequenceView extends Group {
                 while (c.next()) {
                     if (c.wasAdded()) {
                         for (SelectableLabel label: c.getAddedSubList()) {
-//                            label.setTextFill(Color.RED);
                             label.setTextPaint(Color.RED);
                         }
                     }
                     if (c.wasRemoved()) {
                         for (SelectableLabel label: c.getRemoved()) {
-//                            label.setTextFill(Color.BLACK);
                             label.resetTextPaint();
                         }
                     }
@@ -87,13 +85,11 @@ public class SequenceView extends Group {
                 while (c.next()) {
                     if (c.wasAdded()) {
                         for (SelectableLabel label: c.getAddedSubList()) {
-//                            label.setTextFill(Color.RED);
                             label.setTextPaint(Color.RED);
                         }
                     }
                     if (c.wasRemoved()) {
                         for (SelectableLabel label: c.getRemoved()) {
-//                            label.setTextFill(Color.BLACK);
                             label.resetTextPaint();
                         }
                     }

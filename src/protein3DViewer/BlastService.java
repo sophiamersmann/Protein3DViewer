@@ -15,11 +15,7 @@ public class BlastService extends Service<String[]> {
             protected String[] call() throws InterruptedException {
                 final RemoteBlastClient remoteBlastClient = new RemoteBlastClient();
                 remoteBlastClient.setProgram(RemoteBlastClient.BlastProgram.blastp).setDatabase("nr");
-
                 remoteBlastClient.startRemoteSearch(sequence);
-
-                System.err.println("Request id: " + remoteBlastClient.getRequestId());
-                System.err.println("Estimated time: " + remoteBlastClient.getEstimatedTime() + "s");
 
                 RemoteBlastClient.Status status = null;
                 do {
@@ -28,21 +24,6 @@ public class BlastService extends Service<String[]> {
                     status = remoteBlastClient.getRemoteStatus();
                 }
                 while (status == RemoteBlastClient.Status.searching);
-
-                switch (status) {
-                    case hitsFound:
-                        for (String line : remoteBlastClient.getRemoteAlignments()) {
-                            System.out.println(line);
-                        }
-                        break;
-                    case noHitsFound:
-                        System.err.println("No hits");
-                        break;
-                    default:
-                        System.err.println("Status: " + status);
-                }
-
-                System.err.println("Actual time: " + remoteBlastClient.getActualTime() + "s");
 
                 return remoteBlastClient.getRemoteAlignments();
             }

@@ -19,20 +19,8 @@ import protein3DViewer.view.modelVisualization.BoundingBox;
  */
 public abstract class AbstractAtomView extends Group {
 
-//    public final static Color DEFAULT_COLOR = Color.GREY;
-//
-//    public final static Color HELIX_COLOR = Color.GREEN;
-//    public final static Color SHEET_COLOR = Color.ORANGE;
-//
-//    public final static Color SMALL_HYDROPHOBIC_COLOR = Color.SALMON;
-//    public final static Color LARGE_HYDROPHOBIC_COLOR = Color.LIGHTBLUE;
-//    public final static Color POLAR_COLOR = Color.PALEGREEN;
-//    public final static Color POS_CHARGED_COLOR = Color.ORANGERED;
-//    public final static Color NEG_CHARGED_COLOR = Color.NAVAJOWHITE;
-
     Atom atom;
     Sphere shape;
-//    Sphere marker;
 
     DoubleProperty x = new SimpleDoubleProperty();
     DoubleProperty y = new SimpleDoubleProperty();
@@ -42,22 +30,12 @@ public abstract class AbstractAtomView extends Group {
     BooleanProperty shiftSelected = new SimpleBooleanProperty();
     BooleanProperty altSelected = new SimpleBooleanProperty();
 
-    Color color;
-    Color prevColor;
-
     BoundingBox boundingBox;
     AtomLabel label;
 
     public AbstractAtomView(Atom atom) {
         this.atom = atom;
         shape = new Sphere();
-//        shape.radiusProperty().addListener(new ChangeListener<Number>() {
-//            @Override
-//            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-//                marker.setRadius((double) newValue / 3);
-//            }
-//        });
-//        setEffect(new Bloom(0.8));
         setTranslateX(atom.getX());
         setTranslateY(atom.getY());
         setTranslateZ(atom.getZ());
@@ -67,84 +45,51 @@ public abstract class AbstractAtomView extends Group {
         x.bindBidirectional(translateXProperty());
         y.bindBidirectional(translateYProperty());
         z.bindBidirectional(translateZProperty());
-//        initMarker();
         getChildren().add(shape);
     }
 
-//    private void initMarker() {
-//        marker = new Sphere();
-//        marker.setRadius(shape.getRadius() / 3);
-//        marker.setMaterial(new PhongMaterial(Color.YELLOW));
-//        marker.translateXProperty().bind(shape.translateXProperty());
-//        marker.translateYProperty().bind(shape.translateYProperty());
-//        marker.translateZProperty().bind(shape.translateZProperty());
-//        marker.scaleXProperty().bind(shape.scaleXProperty());
-//        marker.scaleYProperty().bind(shape.scaleYProperty());
-//        marker.scaleZProperty().bind(shape.scaleZProperty());
-//        marker.rotationAxisProperty().bind(shape.rotationAxisProperty());
-//        marker.rotateProperty().bind(shape.rotateProperty());
-//    }
-//
-//    public void addMarker() {
-//        getChildren().add(marker);
-//    }
-//
-//    public void removeMarker() {
-//        getChildren().remove(marker);
-//    }
-
+    /**
+     * set default radius of atom based on atomic radius of the specific atom
+     *
+     * @param scaleFactor atomic radius
+     */
     public void setDefaultRadius(Integer scaleFactor) {
         shape.setRadius(1 / (scaleFactor * 0.1));
     }
 
-    public void setColor(Color color) {
-        prevColor = this.color;
-        this.color = color;
-        shape.setMaterial(new PhongMaterial(color));
-    }
-
-    public void resetColor() {
-        if (prevColor != null) {
-            shape.setMaterial(new PhongMaterial(prevColor));
-        }
-        Color tmp = color;
-        color = prevColor;
-        prevColor = tmp; // TODO
-    }
-
-//    public void setMaterial(Color color) {
-//        PhongMaterial material = new PhongMaterial();
-//        material.setDiffuseColor(color);
-//        material.setSpecularColor(Color.BLACK);
-//        shape.setMaterial(material);
-//    }
-
-//    public Color getDiffuseColor() {
-//        PhongMaterial material = (PhongMaterial) shape.getMaterial();
-//        return material.getDiffuseColor();
-//    }
-
-    public void changeRadius(Double factor) {
-        shape.setRadius(shape.getRadius() + factor);
-    }
-
+    /**
+     * increase/decrease size of the atom
+     *
+     * @param factor factor by which atom size is changed
+     */
     public void changeSize(Double factor) {
         setScaleX(getScaleX() + factor);
         setScaleY(getScaleY() + factor);
         setScaleZ(getScaleZ() + factor);
     }
 
+    /**
+     * given a specific color mode, get the corresponding color of the atom
+     *
+     * @param mode color mode
+     * @return color of the atom
+     */
     public Color getColor(ColorMode mode) {
         switch (mode) {
             case UNICOLOR: return ColorValue.DEFAULT.getColor();
-            case BY_ATOM_TYPE: return getAminoAcidColor();
+            case BY_ATOM_TYPE: return getAtomTypeColor();
             case BY_SECONDARY_STRUCTURE: return getSecondaryStructureColor();
             case BY_PROPERTIES: return getPropertyColor();
             default: return ColorValue.DEFAULT.getColor();
         }
     }
 
-    private Color getAminoAcidColor() {
+    /**
+     * get color of atom, if color mode is by atom type
+     *
+     * @return color of the atom
+     */
+    private Color getAtomTypeColor() {
         if (this instanceof CarbonView) {
             return CarbonView.COLOR;
         } else if (this instanceof NitrogenView) {
@@ -156,6 +101,11 @@ public abstract class AbstractAtomView extends Group {
         }
     }
 
+    /**
+     * get color of atom, if color mode is by secondary structure
+     *
+     * @return color of the atom
+     */
     private Color getSecondaryStructureColor() {
         if (atom.getResidue().isInHelix()) {
             return ColorValue.HELIX.getColor();
@@ -166,6 +116,11 @@ public abstract class AbstractAtomView extends Group {
         }
     }
 
+    /**
+     * get color of atom, if color mode is by properties
+     *
+     * @return color ot the atom
+     */
     private Color getPropertyColor() {
         switch (AminoAcidGroup.aminoAcidGroupOf(atom.getResidue().getName())) {
             case SMALL_HYDROPHOBIC: return ColorValue.SMALL_HYDROPHOBIC.getColor();
@@ -175,6 +130,10 @@ public abstract class AbstractAtomView extends Group {
             case NEG_CHARGED: return ColorValue.NEGATIVE_CHARGED.getColor();
             default: return ColorValue.DEFAULT.getColor();
         }
+    }
+
+    public void setColor(Color color) {
+        shape.setMaterial(new PhongMaterial(color));
     }
 
     public double getRadius() {

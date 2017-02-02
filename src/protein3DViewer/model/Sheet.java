@@ -12,7 +12,7 @@ public class Sheet {
     private Map<Integer, Strand> strands = new HashMap<>();
 
     /**
-     * tells if a given residue lies within the helix
+     * returns true, if a given residue lies within the helix
      *
      * @param residue
      * @return true, if the given residue is part of the sheet

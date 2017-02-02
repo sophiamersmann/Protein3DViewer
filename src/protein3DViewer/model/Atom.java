@@ -92,16 +92,5 @@ public class Atom {
         this.residue = residue;
     }
 
-//    @Override
-//    public String toString() {
-//        return "Atom{" +
-//                "id=" + id +
-//                ", name='" + name + '\'' +
-//                ", element='" + element + '\'' +
-//                ", x=" + x +
-//                ", y=" + y +
-//                ", z=" + z +
-//                ", residue=" + residue +
-//                '}';
-//    }
+
 }

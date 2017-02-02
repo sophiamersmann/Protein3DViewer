@@ -13,18 +13,17 @@ public abstract class AbstractModelVisualization {
     ModelView modelView;
 
     Group bottomGroup = new Group();
-    Group topGroup = new Group();
 
     public AbstractModelVisualization(Model model, ModelView modelView) {
         this.model = model;
         this.modelView = modelView;
         createBottomGroup();
-        createTopGroup();
     }
 
+    /**
+     * create group of 3D elements to be displayed
+     */
     abstract void createBottomGroup();
-
-    abstract void createTopGroup();
 
     public Group getBottomGroup() {
         return bottomGroup;
@@ -34,11 +33,4 @@ public abstract class AbstractModelVisualization {
         this.bottomGroup = bottomGroup;
     }
 
-    public Group getTopGroup() {
-        return topGroup;
-    }
-
-    public void setTopGroup(Group topGroup) {
-        this.topGroup = topGroup;
-    }
 }

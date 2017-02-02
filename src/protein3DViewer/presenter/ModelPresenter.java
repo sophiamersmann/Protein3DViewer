@@ -5,18 +5,15 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
-import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
-import javafx.scene.transform.Translate;
 import protein3DViewer.model.Model;
 import protein3DViewer.view.ModelView;
 import protein3DViewer.view.VisualizationMode;
 import protein3DViewer.view.atomView.AbstractAtomView;
-import protein3DViewer.view.modelVisualization.AtomLabel;
 import protein3DViewer.view.modelVisualization.SticksVisualization;
 
 import java.util.ArrayList;
@@ -45,6 +42,9 @@ public class ModelPresenter {
 
     private void setUpPane() {
 
+        /**
+         * reset all selections made by left-clicking
+         */
         modelView.getStackPane().setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -54,16 +54,15 @@ public class ModelPresenter {
                         SticksVisualization sticksVisualization = (SticksVisualization) modelView.getModelVisualization(VisualizationMode.STICKS);
                         sticksVisualization.clearSelection();
                     }
-//                    atomViews.forEach(atomView -> atomView.setSelected(false));
-//                    atomViews.forEach(atomView -> atomView.setShiftSelected(false));
-//                    atomViews.forEach(atomView -> atomView.setAltSelected(false));
                     modelView.getTopPane().getChildren().clear();
                 }
 
             }
         });
 
-        // TODO: zooming
+        /**
+         * zoom on scrolling
+         */
         modelView.getStackPane().setOnScroll(new EventHandler<ScrollEvent>() {
             @Override
             public void handle(ScrollEvent event) {
@@ -77,8 +76,6 @@ public class ModelPresenter {
 
                 Scale scale = new Scale(scaledX, scaledY, scaledZ);
                 modelView.getBottomGroup().worldTransformProperty().setValue(scale.createConcatenation(modelView.getBottomGroup().getWorldTransform()));
-
-//                modelView.worldTransformProperty().setValue(scale.createConcatenation(modelView.getWorldTransform()));
             }
         });
 
@@ -91,22 +88,18 @@ public class ModelPresenter {
             }
         });
 
+        /**
+         * rotate displayed model content by dragging
+         */
         modelView.getStackPane().setOnMouseDragged(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
                 Double deltaX = event.getSceneX() - downX;
                 Double deltaY = event.getSceneY() - downY;
-                if (event.isShiftDown()) { /// TODO remove that
-                    Translate translate = new Translate(deltaX, deltaY);
-                    modelView.getBottomGroup().worldTransformProperty().setValue(translate.createConcatenation(modelView.getBottomGroup().getWorldTransform()));
-//                    modelView.worldTransformProperty().setValue(translate.createConcatenation(modelView.getWorldTransform()));
-                } else {
-                    Point2D delta = new Point2D(deltaX, deltaY);
-                    Point3D rotationAxis = new Point3D(-deltaY, deltaX, 0);
-                    Rotate rotate = new Rotate(delta.magnitude(), rotationAxis);
-                    modelView.getBottomGroup().worldTransformProperty().setValue(rotate.createConcatenation(modelView.getBottomGroup().getWorldTransform()));
-//                    modelView.worldTransformProperty().setValue(rotate.createConcatenation(modelView.getWorldTransform()));
-                }
+                Point2D delta = new Point2D(deltaX, deltaY);
+                Point3D rotationAxis = new Point3D(-deltaY, deltaX, 0);
+                Rotate rotate = new Rotate(delta.magnitude(), rotationAxis);
+                modelView.getBottomGroup().worldTransformProperty().setValue(rotate.createConcatenation(modelView.getBottomGroup().getWorldTransform()));
                 downX = event.getSceneX();
                 downY = event.getSceneY();
                 event.consume();
@@ -120,14 +113,16 @@ public class ModelPresenter {
         for (AbstractAtomView atomView: atomViews) {
             setUpAtomView(atomView);
         }
-//        SticksVisualization sticksVisualization = (SticksVisualization) modelView.getModelVisualization(VisualizationMode.STICKS);
-//        for (AbstractAtomView atomView: sticksVisualization.getAtomViews().values()) {
-//            setUpAtomView(atomView);
-//        }
 
     }
 
-    public void selectAllAtomsOfResidue(AbstractAtomView atomView) {
+    /**
+     * given a specific atom view, shift-select all atom views belonging
+     * to the same residue
+     *
+     * @param atomView given atom view
+     */
+    public void shiftSelectAllAtomViewsOfResidue(AbstractAtomView atomView) {
         SticksVisualization sticksVisualization = (SticksVisualization) modelView.getModelVisualization(VisualizationMode.STICKS);
         for (int atomID: atomView.getAtom().getResidue().getAtoms().keySet()) {
             AbstractAtomView view = sticksVisualization.getAtomViews().get(atomID);
@@ -138,25 +133,9 @@ public class ModelPresenter {
 
     private void setUpAtomView(AbstractAtomView atomView) {
 
-//        atomView.setOnMouseEntered(new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent event) {
-//                event.consume();
-//                AtomLabel label = new AtomLabel(atomView, modelView.getBottomPane(), modelView.getBottomGroup().worldTransformProperty());
-//                atomView.setLabel(label);
-//                modelView.getTopPane().getChildren().add(label);
-//            }
-//        });
-//
-//        atomView.setOnMouseExited(new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent event) {
-//                event.consume();
-//                modelView.getTopPane().getChildren().remove(atomView.getLabel());
-//            }
-//        });
-
-        // TODO ALT distance
+        /**
+         * make atom clickable
+         */
         atomView.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -167,45 +146,53 @@ public class ModelPresenter {
                     atomView.setAltSelected(!atomView.isAltSelected());
                 } else {
                     atomView.setSelected(!atomView.isSelected());
-                    selectAllAtomsOfResidue(atomView);
+                    shiftSelectAllAtomViewsOfResidue(atomView);
                 }
             }
         });
 
+        /**
+         * update selection model if atom gets selected or unselected
+         */
         atomView.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 SticksVisualization sticksVisualization = (SticksVisualization) modelView.getModelVisualization(VisualizationMode.STICKS);
                 if (newValue) {
-                    sticksVisualization.getSelectionModel().clearAndSelect(atomViews.indexOf(atomView));
+                    sticksVisualization.getResidueSelectionModel().clearAndSelect(atomViews.indexOf(atomView));
                 } else {
-//                    sticksVisualization.getSelectionModel().clearSelection(atomViews.indexOf(atomView)); // TODO
-                    sticksVisualization.getSelectionModel().clearSelection();
+                    sticksVisualization.getResidueSelectionModel().clearSelection();
                 }
 
             }
         });
 
+        /**
+         * update selection model if atom gets shift-selected or -unselected
+         */
         atomView.shiftSelectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 SticksVisualization sticksVisualization = (SticksVisualization) modelView.getModelVisualization(VisualizationMode.STICKS);
                 if (newValue) {
-                    sticksVisualization.getSelectionModel().select(atomViews.indexOf(atomView));
+                    sticksVisualization.getResidueSelectionModel().select(atomViews.indexOf(atomView));
                 } else {
-                    sticksVisualization.getSelectionModel().clearSelection(atomViews.indexOf(atomView));
+                    sticksVisualization.getResidueSelectionModel().clearSelection(atomViews.indexOf(atomView));
                 }
             }
         });
 
+        /**
+         * update selection model if atom gets alt-selected or -unselected
+         */
         atomView.altSelectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 SticksVisualization sticksVisualization = (SticksVisualization) modelView.getModelVisualization(VisualizationMode.STICKS);
                 if (newValue) {
-                    sticksVisualization.getDistanceSelectionModel().select(atomViews.indexOf(atomView));
+                    sticksVisualization.getAtomSelectionModel().select(atomViews.indexOf(atomView));
                 } else {
-                    sticksVisualization.getDistanceSelectionModel().clearSelection(atomViews.indexOf(atomView));
+                    sticksVisualization.getAtomSelectionModel().clearSelection(atomViews.indexOf(atomView));
                 }
             }
         });
