@@ -1,9 +1,7 @@
 package protein3DViewer.view.modelVisualization;
 
-import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.Cylinder;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import protein3DViewer.model.*;
@@ -13,9 +11,7 @@ import protein3DViewer.view.bondView.Line;
 
 import java.util.*;
 
-import static protein3DViewer.view.modelVisualization.MeshTools.createPseudoAtom;
-import static protein3DViewer.view.modelVisualization.MeshTools.toFloatArray;
-import static protein3DViewer.view.modelVisualization.MeshTools.toIntArray;
+import static protein3DViewer.view.modelVisualization.MeshTools.*;
 
 /**
  * Created by sophiamersmann on 23/01/2017.
@@ -50,7 +46,7 @@ public class CartoonVisualization extends AbstractModelVisualization {
     private void createHelixViews() {
         helices = new ArrayList<>();
         helixGroup = new Group();
-        for (Helix helix: model.getProtein().getSecondaryStructure().getHelices().values()) {
+        for (Helix helix : model.getProtein().getSecondaryStructure().getHelices().values()) {
             Line line = new Line(
                     helix.getInitResidue().getAtom(AtomName.CARBON_ALPHA).getX(),
                     helix.getInitResidue().getAtom(AtomName.CARBON_ALPHA).getY(),
@@ -73,8 +69,8 @@ public class CartoonVisualization extends AbstractModelVisualization {
         strands = new ArrayList<>();
         strandGroup = new Group();
         mapResIdToAtomToIndex = new HashMap<>();
-        for (Sheet sheet: model.getProtein().getSecondaryStructure().getSheets().values()) {
-            for (Strand strand: sheet.getStrands().values()) {
+        for (Sheet sheet : model.getProtein().getSecondaryStructure().getSheets().values()) {
+            for (Strand strand : sheet.getStrands().values()) {
                 TriangleMesh strandMesh = new TriangleMesh();
                 strandMesh.getTexCoords().addAll(0, 0);
                 strandMesh.getPoints().addAll(extractPoints(strand));
@@ -131,7 +127,7 @@ public class CartoonVisualization extends AbstractModelVisualization {
     /**
      * extract all points of a specific for a triangle mesh
      *
-     * @param points already extracted points
+     * @param points  already extracted points
      * @param residue residue
      * @return points
      */
@@ -150,8 +146,8 @@ public class CartoonVisualization extends AbstractModelVisualization {
     /**
      * extract points of a specific atom for a triangle mesh
      *
-     * @param points already extracted points
-     * @param atom atom
+     * @param points    already extracted points
+     * @param atom      atom
      * @param residueID ID of the residue to which the atom belongs
      * @return points
      */
@@ -169,12 +165,12 @@ public class CartoonVisualization extends AbstractModelVisualization {
     private void createLoops() {
         loops = new ArrayList<>();
         loopGroup = new Group();
-        for (Chain chain: model.getChains().values()) {
+        for (Chain chain : model.getChains().values()) {
             List<Integer> residueIDs = new ArrayList<>(chain.getResidues().keySet());
             Collections.sort(residueIDs);
             for (int i = 0; i < residueIDs.size() - 1; i++) {
                 Residue currRes = chain.getResidues().get(residueIDs.get(i));
-                Residue nextRes = chain.getResidues().get(residueIDs.get(i+1));
+                Residue nextRes = chain.getResidues().get(residueIDs.get(i + 1));
                 if (!(currRes.isInHelix() || currRes.isInSheet()) || !(nextRes.isInHelix() || nextRes.isInSheet())) {
                     Line loop = new Line(
                             currRes.getAtom(AtomName.CARBON_ALPHA).getX(),

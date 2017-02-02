@@ -71,10 +71,10 @@ public class Chain {
     /**
      * create bond between two atoms
      *
-     * @param startResidue residue of the first atom
+     * @param startResidue  residue of the first atom
      * @param startAtomName name of the first atom
-     * @param endResidue residue of the second atom
-     * @param endAtomName name of the second atom
+     * @param endResidue    residue of the second atom
+     * @param endAtomName   name of the second atom
      */
     private void createBond(Residue startResidue, AtomName start, Residue endResidue, AtomName end) {
         Atom startAtom = startResidue.getAtom(start);

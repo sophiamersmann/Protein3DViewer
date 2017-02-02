@@ -76,7 +76,7 @@ public class MySelectionModel<T> extends MultipleSelectionModel<T> {
         for (int index = 0; index < items.length; index++) {
             selectedIndices.add(index);
         }
-        focusIndex=-1;
+        focusIndex = -1;
     }
 
     @Override
@@ -142,12 +142,12 @@ public class MySelectionModel<T> extends MultipleSelectionModel<T> {
 
     @Override
     public void selectPrevious() {
-        select(focusIndex-1);
+        select(focusIndex - 1);
     }
 
     @Override
     public void selectNext() {
-        select(focusIndex+1);
+        select(focusIndex + 1);
     }
 
     /**

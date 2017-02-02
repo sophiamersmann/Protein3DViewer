@@ -14,20 +14,30 @@ import javafx.geometry.Point3D;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
-import protein3DViewer.*;
+import protein3DViewer.BlastSearchResultParser;
+import protein3DViewer.BlastService;
+import protein3DViewer.Director;
+import protein3DViewer.PDBParser;
 import protein3DViewer.model.Atom;
 import protein3DViewer.model.AtomName;
 import protein3DViewer.model.Protein;
-import protein3DViewer.view.*;
+import protein3DViewer.view.ColorMode;
+import protein3DViewer.view.ColorValue;
+import protein3DViewer.view.ProteinView;
+import protein3DViewer.view.VisualizationMode;
 import protein3DViewer.view.atomView.AbstractAtomView;
 import protein3DViewer.view.atomView.CarbonView;
 import protein3DViewer.view.bondView.Line;
 import protein3DViewer.view.modelVisualization.AtomLabel;
+import protein3DViewer.view.modelVisualization.Connection;
 import protein3DViewer.view.modelVisualization.SticksVisualization;
 
 import java.io.File;
@@ -173,10 +183,10 @@ public class ProteinPresenter {
 
                     if (result.get() == buttonApply) {
                         Color pickedColor = colorPicker.getValue();
-                        for (AbstractAtomView atomView: sticksVisualization.getResidueSelectionModel().getSelectedItems()) {
+                        for (AbstractAtomView atomView : sticksVisualization.getResidueSelectionModel().getSelectedItems()) {
                             atomView.setColor(pickedColor);
                         }
-                        for (AbstractAtomView atomView: sticksVisualization.getAtomSelectionModel().getSelectedItems()) {
+                        for (AbstractAtomView atomView : sticksVisualization.getAtomSelectionModel().getSelectedItems()) {
                             atomView.setColor(pickedColor);
                         }
                     }
@@ -245,7 +255,7 @@ public class ProteinPresenter {
             @Override
             public void handle(ActionEvent event) {
                 ColorValue.reset();
-                for (ColorValue colorValue: ColorValue.values()) {
+                for (ColorValue colorValue : ColorValue.values()) {
                     changeColorOfCurrentView(colorValue);
                 }
                 if (proteinView.getVisualizeSticks().isSelected() && proteinView.getChooseColoring().getValue() == ColorMode.BY_ATOM_TYPE) {
@@ -425,7 +435,6 @@ public class ProteinPresenter {
     }
 
 
-
     private void setUpToolBar() {
 
         proteinView.getShowAtoms().selectedProperty().addListener(new ChangeListener<Boolean>() {
@@ -560,41 +569,45 @@ public class ProteinPresenter {
         proteinView.getCalculateDistanceButton().setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                    SticksVisualization sticksVisualization = (SticksVisualization) proteinView.getModelView().getModelVisualization(VisualizationMode.STICKS);
-                    if (sticksVisualization.getAtomSelectionModel().getSelectedItems().size() == 2
-                            || sticksVisualization.getResidueSelectionModel().getSelectedItems().size() >= 8
-                            && sticksVisualization.getResidueSelectionModel().getSelectedItems().size() <= 10) {
-                        if (sticksVisualization.getAtomSelectionModel().getSelectedItems().size() == 2) {
-                            AbstractAtomView atomView1 = sticksVisualization.getAtomSelectionModel().getSelectedItems().get(0);
-                            AbstractAtomView atomView2 = sticksVisualization.getAtomSelectionModel().getSelectedItems().get(1);
-                            visualizeDistance(atomView1, atomView2);
-                        }
-                        if (sticksVisualization.getResidueSelectionModel().getSelectedItems().size() >= 8 && sticksVisualization.getResidueSelectionModel().getSelectedItems().size() <= 10) {
-                            // extract the two CA-atoms selected
-                            AbstractAtomView[] atomViews = new AbstractAtomView[2];
-                            int i = 0;
-                            for (AbstractAtomView atomView: sticksVisualization.getResidueSelectionModel().getSelectedItems()) {
-                                if (atomView.getAtom().getName() == AtomName.CARBON_ALPHA) {
-                                    atomViews[i++] = atomView;
-                                }
-                            }
-                            visualizeDistance(atomViews[0], atomViews[1]);
-                        }
-                    } else {
-                        final Alert alert = new Alert(Alert.AlertType.ERROR);
-                        alert.setHeaderText("Distance can't be calculated.");
-                        alert.setContentText("Please select either exactly two atoms or exactly two residues.");
-                        alert.showAndWait();
+                SticksVisualization sticksVisualization = (SticksVisualization) proteinView.getModelView().getModelVisualization(VisualizationMode.STICKS);
+                if (sticksVisualization.getAtomSelectionModel().getSelectedItems().size() == 2
+                        || sticksVisualization.getResidueSelectionModel().getSelectedItems().size() >= 8
+                        && sticksVisualization.getResidueSelectionModel().getSelectedItems().size() <= 10) {
+                    if (sticksVisualization.getAtomSelectionModel().getSelectedItems().size() == 2) {
+                        int numberOfSelectedItems = sticksVisualization.getAtomSelectionModel().getSelectedItems().size();
+                        AbstractAtomView atomView1 = sticksVisualization.getAtomSelectionModel().getSelectedItems().get(numberOfSelectedItems - 1);
+                        AbstractAtomView atomView2 = sticksVisualization.getAtomSelectionModel().getSelectedItems().get(numberOfSelectedItems - 2);
+                        visualizeDistance(atomView1, atomView2);
                     }
+                    if (sticksVisualization.getResidueSelectionModel().getSelectedItems().size() >= 8 && sticksVisualization.getResidueSelectionModel().getSelectedItems().size() <= 10) {
+                        // extract the two CA-atoms selected
+                        AbstractAtomView[] atomViews = new AbstractAtomView[2];
+                        int i = 0;
+                        for (AbstractAtomView atomView : sticksVisualization.getResidueSelectionModel().getSelectedItems()) {
+                            if (atomView.getAtom().getName() == AtomName.CARBON_ALPHA) {
+                                atomViews[i++] = atomView;
+                            }
+                        }
+                        visualizeDistance(atomViews[0], atomViews[1]);
+                    }
+                } else {
+                    final Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setHeaderText("Distance can't be calculated.");
+                    alert.setContentText("Please select either exactly two atoms or exactly two residues.");
+                    alert.showAndWait();
                 }
+            }
 
             private void visualizeDistance(AbstractAtomView atomView1, AbstractAtomView atomView2) {
                 SticksVisualization sticksVisualization = (SticksVisualization) proteinView.getModelView().getModelVisualization(VisualizationMode.STICKS);
 
                 // connect atoms by a line
-                Line connection = new Line(atomView1.getX(), atomView1.getY(), atomView1.getZ(),
-                        atomView2.getX(), atomView2.getY(), atomView2.getZ()
-                );
+                Connection connection = new Connection(atomView1, atomView2);
+                atomView1.getConnections().add(connection);
+                atomView2.getConnections().add(connection);
+//                Line connection = new Line(atomView1.getX(), atomView1.getY(), atomView1.getZ(),
+//                        atomView2.getX(), atomView2.getY(), atomView2.getZ()
+//                );
                 connection.setMaterial(new PhongMaterial(Color.BLACK));
                 sticksVisualization.getConnectionGroup().getChildren().add(connection);
 
@@ -614,6 +627,7 @@ public class ProteinPresenter {
                 DecimalFormat df = new DecimalFormat("#.##");
                 AtomLabel distanceLabel = new AtomLabel(pseudo, proteinView.getModelView().getBottomPane(), proteinView.getModelView().getBottomGroup().worldTransformProperty(),
                         df.format(Math.abs(end.subtract(start).magnitude())) + "A");
+                connection.setLabel(distanceLabel);
                 proteinView.getModelView().getTopPane().getChildren().add(distanceLabel);
             }
 

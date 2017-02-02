@@ -40,7 +40,7 @@ public class SequencePresenter {
      */
     private void setUpResidueViews() {
         residueViews = new ArrayList<>(sequenceView.getResidueViews().values());
-        for (SelectableLabel label: residueViews) {
+        for (SelectableLabel label : residueViews) {
             setUpSelectableLabel(label, residueViews, sequenceView.getSelectionModelResidueSeq());
         }
     }
@@ -49,7 +49,7 @@ public class SequencePresenter {
      * set up labels annotating each residue by its secondary structure
      */
     private void setUpSecondaryStructureAnnotations() {
-        for (SelectableLabel label: sequenceView.getSecondaryStructureAnnotations()) {
+        for (SelectableLabel label : sequenceView.getSecondaryStructureAnnotations()) {
             setUpSelectableLabel(label, sequenceView.getSecondaryStructureAnnotations(), sequenceView.getSelectionModelAnnotationSeq());
 
         }
@@ -58,8 +58,8 @@ public class SequencePresenter {
     /**
      * make a selectable label clickable
      *
-     * @param label the label
-     * @param labels list of labels containing the given label
+     * @param label          the label
+     * @param labels         list of labels containing the given label
      * @param selectionModel corresponding selection model
      */
     private void setUpSelectableLabel(SelectableLabel label, List<SelectableLabel> labels, MySelectionModel selectionModel) {

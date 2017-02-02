@@ -1,7 +1,5 @@
 package protein3DViewer;
 
-import java.util.Arrays;
-
 /**
  * Created by sophiamersmann on 22/01/2017.
  */

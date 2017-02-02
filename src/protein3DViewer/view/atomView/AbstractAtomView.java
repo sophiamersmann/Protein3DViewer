@@ -13,6 +13,10 @@ import protein3DViewer.view.ColorMode;
 import protein3DViewer.view.ColorValue;
 import protein3DViewer.view.modelVisualization.AtomLabel;
 import protein3DViewer.view.modelVisualization.BoundingBox;
+import protein3DViewer.view.modelVisualization.Connection;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by sophiamersmann on 20/01/2017.
@@ -32,6 +36,8 @@ public abstract class AbstractAtomView extends Group {
 
     BoundingBox boundingBox;
     AtomLabel label;
+
+    List<Connection> connections = new ArrayList<>();
 
     public AbstractAtomView(Atom atom) {
         this.atom = atom;
@@ -76,11 +82,16 @@ public abstract class AbstractAtomView extends Group {
      */
     public Color getColor(ColorMode mode) {
         switch (mode) {
-            case UNICOLOR: return ColorValue.DEFAULT.getColor();
-            case BY_ATOM_TYPE: return getAtomTypeColor();
-            case BY_SECONDARY_STRUCTURE: return getSecondaryStructureColor();
-            case BY_PROPERTIES: return getPropertyColor();
-            default: return ColorValue.DEFAULT.getColor();
+            case UNICOLOR:
+                return ColorValue.DEFAULT.getColor();
+            case BY_ATOM_TYPE:
+                return getAtomTypeColor();
+            case BY_SECONDARY_STRUCTURE:
+                return getSecondaryStructureColor();
+            case BY_PROPERTIES:
+                return getPropertyColor();
+            default:
+                return ColorValue.DEFAULT.getColor();
         }
     }
 
@@ -123,12 +134,18 @@ public abstract class AbstractAtomView extends Group {
      */
     private Color getPropertyColor() {
         switch (AminoAcidGroup.aminoAcidGroupOf(atom.getResidue().getName())) {
-            case SMALL_HYDROPHOBIC: return ColorValue.SMALL_HYDROPHOBIC.getColor();
-            case LARGE_HYDROPHOBIC: return ColorValue.LARGE_HYDROPHOBIC.getColor();
-            case POLAR: return ColorValue.POLAR.getColor();
-            case POS_CHARGED: return ColorValue.POSITIVE_CHARGED.getColor();
-            case NEG_CHARGED: return ColorValue.NEGATIVE_CHARGED.getColor();
-            default: return ColorValue.DEFAULT.getColor();
+            case SMALL_HYDROPHOBIC:
+                return ColorValue.SMALL_HYDROPHOBIC.getColor();
+            case LARGE_HYDROPHOBIC:
+                return ColorValue.LARGE_HYDROPHOBIC.getColor();
+            case POLAR:
+                return ColorValue.POLAR.getColor();
+            case POS_CHARGED:
+                return ColorValue.POSITIVE_CHARGED.getColor();
+            case NEG_CHARGED:
+                return ColorValue.NEGATIVE_CHARGED.getColor();
+            default:
+                return ColorValue.DEFAULT.getColor();
         }
     }
 
@@ -230,6 +247,14 @@ public abstract class AbstractAtomView extends Group {
 
     public void setAltSelected(boolean altSelected) {
         this.altSelected.set(altSelected);
+    }
+
+    public List<Connection> getConnections() {
+        return connections;
+    }
+
+    public void setConnections(List<Connection> connections) {
+        this.connections = connections;
     }
 
     @Override

@@ -1,12 +1,9 @@
 package protein3DViewer.view.modelVisualization;
 
-import com.oracle.webservices.internal.api.message.PropertySet;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.Property;
 import javafx.geometry.Bounds;
-import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -51,6 +48,7 @@ public class BoundingBox extends Rectangle {
             {
                 bind(binding);
             }
+
             @Override
             protected double computeValue() {
                 return binding.get().getX();
@@ -61,6 +59,7 @@ public class BoundingBox extends Rectangle {
             {
                 bind(binding);
             }
+
             @Override
             protected double computeValue() {
                 return binding.get().getY();
@@ -71,6 +70,7 @@ public class BoundingBox extends Rectangle {
             {
                 bind(binding);
             }
+
             @Override
             protected double computeValue() {
                 return binding.get().getScaleX();
@@ -81,6 +81,7 @@ public class BoundingBox extends Rectangle {
             {
                 bind(binding);
             }
+
             @Override
             protected double computeValue() {
                 return binding.get().getScaleY();
@@ -91,6 +92,7 @@ public class BoundingBox extends Rectangle {
             {
                 bind(binding);
             }
+
             @Override
             protected double computeValue() {
                 return binding.get().getWidth();
@@ -101,6 +103,7 @@ public class BoundingBox extends Rectangle {
             {
                 bind(binding);
             }
+
             @Override
             protected double computeValue() {
                 return binding.get().getHeight();

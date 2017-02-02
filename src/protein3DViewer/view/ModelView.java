@@ -1,27 +1,18 @@
 package protein3DViewer.view;
 
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
 import javafx.scene.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Transform;
-import protein3DViewer.MySelectionModel;
-import protein3DViewer.model.*;
-import protein3DViewer.view.atomView.AbstractAtomView;
-import protein3DViewer.view.atomView.CarbonView;
+import protein3DViewer.model.Atom;
+import protein3DViewer.model.Chain;
+import protein3DViewer.model.Model;
+import protein3DViewer.model.Residue;
 import protein3DViewer.view.modelVisualization.AbstractModelVisualization;
-import protein3DViewer.view.modelVisualization.BoundingBox;
 import protein3DViewer.view.modelVisualization.ModelVisualizationFactory;
 import protein3DViewer.view.modelVisualization.SticksVisualization;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by sophiamersmann on 20/01/2017.
@@ -59,9 +50,9 @@ public class ModelView extends Group {
         double offsetX = calculateOffset("X");
         double offsetY = calculateOffset("Y");
         // move each atom by offset
-        for (Chain chain: model.getChains().values()) {
-            for (Residue residue: chain.getResidues().values()) {
-                for (Atom atom: residue.getAtoms().values()) {
+        for (Chain chain : model.getChains().values()) {
+            for (Residue residue : chain.getResidues().values()) {
+                for (Atom atom : residue.getAtoms().values()) {
                     atom.setX(atom.getX() + offsetX);
                     atom.setY(atom.getY() + offsetY);
                 }
@@ -77,9 +68,9 @@ public class ModelView extends Group {
      */
     private double calculateOffset(String mode) {
         double min = Double.POSITIVE_INFINITY, max = Double.NEGATIVE_INFINITY;
-        for (Chain chain: model.getChains().values()) {
-            for (Residue residue: chain.getResidues().values()) {
-                for (Atom atom: residue.getAtoms().values()) {
+        for (Chain chain : model.getChains().values()) {
+            for (Residue residue : chain.getResidues().values()) {
+                for (Atom atom : residue.getAtoms().values()) {
                     double value = mode.equalsIgnoreCase("X") ? atom.getX() : atom.getY();
                     if (value < min) {
                         min = value;
@@ -136,7 +127,7 @@ public class ModelView extends Group {
      * remove all visualization modes
      */
     public void clear() {
-        for (VisualizationMode visualizationMode: modelVisualizations.keySet()) {
+        for (VisualizationMode visualizationMode : modelVisualizations.keySet()) {
             removeVisualization(visualizationMode);
         }
     }

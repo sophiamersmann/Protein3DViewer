@@ -5,6 +5,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
+import javafx.scene.control.ButtonType;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -110,7 +111,7 @@ public class ModelPresenter {
     void setUpAtomViews() {
         SticksVisualization sticksVisualization = (SticksVisualization) modelView.getModelVisualization(VisualizationMode.STICKS);
         atomViews = new ArrayList<>(sticksVisualization.getAtomViews().values());
-        for (AbstractAtomView atomView: atomViews) {
+        for (AbstractAtomView atomView : atomViews) {
             setUpAtomView(atomView);
         }
 
@@ -124,7 +125,7 @@ public class ModelPresenter {
      */
     public void shiftSelectAllAtomViewsOfResidue(AbstractAtomView atomView) {
         SticksVisualization sticksVisualization = (SticksVisualization) modelView.getModelVisualization(VisualizationMode.STICKS);
-        for (int atomID: atomView.getAtom().getResidue().getAtoms().keySet()) {
+        for (int atomID : atomView.getAtom().getResidue().getAtoms().keySet()) {
             AbstractAtomView view = sticksVisualization.getAtomViews().get(atomID);
             view.setShiftSelected(!view.isShiftSelected());
         }

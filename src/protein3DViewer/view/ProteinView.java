@@ -7,7 +7,7 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
 import protein3DViewer.model.Chain;
 import protein3DViewer.model.Protein;
 import protein3DViewer.model.Residue;
@@ -120,8 +120,8 @@ public class ProteinView {
         numberOfEachSecondaryStructure.put("Sheet", 0);
         numberOfEachSecondaryStructure.put("Loop", 0);
 
-        for (Chain chain: protein.getModel().getChains().values()) {
-            for (Residue residue: chain.getResidues().values()) {
+        for (Chain chain : protein.getModel().getChains().values()) {
+            for (Residue residue : chain.getResidues().values()) {
                 if (!numberOfEachResidueType.containsKey(residue.getName3())) {
                     numberOfEachResidueType.put(residue.getName3(), 0);
                 }
@@ -144,10 +144,10 @@ public class ProteinView {
     /**
      * create pie chart
      *
-     * @param pieChart pie chart
-     * @param typeCount number of items of a certain type
+     * @param pieChart              pie chart
+     * @param typeCount             number of items of a certain type
      * @param totalNumberOfResidues total number of residues of the protein
-     * @param title title of pie chart
+     * @param title                 title of pie chart
      */
     private static void createPieChart(PieChart pieChart, Map<String, Integer> typeCount, int totalNumberOfResidues, String title) {
         List<PieChart.Data> pieChartDataArray = new ArrayList<>();
@@ -287,7 +287,7 @@ public class ProteinView {
     public void initCrossLinking() {
         if (modelView.getModelVisualizations().containsKey(VisualizationMode.STICKS)) {
             SticksVisualization sticksVisualization = (SticksVisualization) modelView.getModelVisualization(VisualizationMode.STICKS);
-            for (AbstractAtomView atomView: sticksVisualization.getAtomViews().values()) {
+            for (AbstractAtomView atomView : sticksVisualization.getAtomViews().values()) {
                 Integer residueId = atomView.getAtom().getResidue().getId();
                 SelectableLabel associatedResidueView = sequenceView.getResidueViews().get(residueId);
                 atomView.selectedProperty().bindBidirectional(associatedResidueView.selectedProperty());

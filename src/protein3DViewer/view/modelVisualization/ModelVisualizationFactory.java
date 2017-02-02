@@ -12,9 +12,9 @@ public class ModelVisualizationFactory {
     /**
      * create model visualization (sticks, ribbon or cartoon)
      *
-     * @param model model
+     * @param model     model
      * @param modelView model view
-     * @param mode model visualization mode
+     * @param mode      model visualization mode
      * @return model visualization
      */
     public static AbstractModelVisualization createModelVisualization(Model model, ModelView modelView, VisualizationMode mode) {

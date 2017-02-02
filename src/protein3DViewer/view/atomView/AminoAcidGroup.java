@@ -17,9 +17,10 @@ public enum AminoAcidGroup {
     private String aminoAcids;
 
     private static Map<Character, AminoAcidGroup> mapAminoAcidToGroup = new HashMap<>();
+
     static {
-        for (AminoAcidGroup aminoAcidGroup: AminoAcidGroup.values()) {
-            for (Character aminoAcid: aminoAcidGroup.aminoAcids.toCharArray()) {
+        for (AminoAcidGroup aminoAcidGroup : AminoAcidGroup.values()) {
+            for (Character aminoAcid : aminoAcidGroup.aminoAcids.toCharArray()) {
                 mapAminoAcidToGroup.put(aminoAcid, aminoAcidGroup);
             }
         }

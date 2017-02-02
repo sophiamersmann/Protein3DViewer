@@ -1,7 +1,5 @@
 package protein3DViewer.model;
 
-import javafx.scene.control.ProgressIndicator;
-
 import java.util.HashMap;
 import java.util.Map;
 

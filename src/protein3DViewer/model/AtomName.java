@@ -1,7 +1,6 @@
 package protein3DViewer.model;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,6 +17,7 @@ public enum AtomName {
     private String pdbName;
 
     private static Map<String, AtomName> mapPDBNameToAtomName = new HashMap<String, AtomName>();
+
     static {
         for (AtomName atomName : AtomName.values()) {
             mapPDBNameToAtomName.put(atomName.pdbName, atomName);

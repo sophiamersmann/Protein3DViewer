@@ -64,12 +64,12 @@ public class SequenceView extends Group {
             public void onChanged(Change<? extends SelectableLabel> c) {
                 while (c.next()) {
                     if (c.wasAdded()) {
-                        for (SelectableLabel label: c.getAddedSubList()) {
+                        for (SelectableLabel label : c.getAddedSubList()) {
                             label.setTextPaint(Color.RED);
                         }
                     }
                     if (c.wasRemoved()) {
-                        for (SelectableLabel label: c.getRemoved()) {
+                        for (SelectableLabel label : c.getRemoved()) {
                             label.resetTextPaint();
                         }
                     }
@@ -84,12 +84,12 @@ public class SequenceView extends Group {
             public void onChanged(Change<? extends SelectableLabel> c) {
                 while (c.next()) {
                     if (c.wasAdded()) {
-                        for (SelectableLabel label: c.getAddedSubList()) {
+                        for (SelectableLabel label : c.getAddedSubList()) {
                             label.setTextPaint(Color.RED);
                         }
                     }
                     if (c.wasRemoved()) {
-                        for (SelectableLabel label: c.getRemoved()) {
+                        for (SelectableLabel label : c.getRemoved()) {
                             label.resetTextPaint();
                         }
                     }
@@ -125,7 +125,7 @@ public class SequenceView extends Group {
     }
 
     public void changeColor() {
-        for (SelectableLabel label: secondaryStructureAnnotations) {
+        for (SelectableLabel label : secondaryStructureAnnotations) {
             if (label.getResidue().isInHelix()) {
                 label.setTextPaint(ColorValue.HELIX.getColor());
             } else if (label.getResidue().isInSheet()) {

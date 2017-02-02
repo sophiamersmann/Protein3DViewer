@@ -11,7 +11,6 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.*;
 import javafx.scene.transform.Transform;
 import protein3DViewer.view.atomView.AbstractAtomView;
 
@@ -39,6 +38,7 @@ public class AtomLabel extends Label {
                 bind(worldTransform);
                 bind(atomView.translateXProperty(), atomView.translateYProperty());
                 bind(atomView.scaleXProperty(), atomView.scaleYProperty());
+                bind(pane.widthProperty(), pane.heightProperty());
                 final Bounds boundsOnScreen = atomView.localToScreen(atomView.getBoundsInLocal());
                 final Bounds paneBoundsOnScreen = pane.localToScreen(pane.getBoundsInLocal());
                 final double xInScene = boundsOnScreen.getMinX() - paneBoundsOnScreen.getMinX();
@@ -57,6 +57,7 @@ public class AtomLabel extends Label {
             {
                 bind(binding);
             }
+
             @Override
             protected double computeValue() {
                 return binding.get().getTranslateX();
@@ -67,6 +68,7 @@ public class AtomLabel extends Label {
             {
                 bind(binding);
             }
+
             @Override
             protected double computeValue() {
                 return binding.get().getTranslateY();
@@ -77,6 +79,7 @@ public class AtomLabel extends Label {
             {
                 bind(binding);
             }
+
             @Override
             protected double computeValue() {
                 return binding.get().getScaleX();
@@ -87,6 +90,7 @@ public class AtomLabel extends Label {
             {
                 bind(binding);
             }
+
             @Override
             protected double computeValue() {
                 return binding.get().getScaleY();

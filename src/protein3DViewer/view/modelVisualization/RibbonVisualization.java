@@ -1,19 +1,16 @@
 package protein3DViewer.view.modelVisualization;
 
-import com.sun.javafx.scene.traversal.SubSceneTraversalEngine;
-import javafx.geometry.Point3D;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import protein3DViewer.model.*;
+import protein3DViewer.view.ColorValue;
 import protein3DViewer.view.ModelView;
 
 import java.util.*;
 
-import static protein3DViewer.view.modelVisualization.MeshTools.createPseudoAtom;
-import static protein3DViewer.view.modelVisualization.MeshTools.toFloatArray;
-import static protein3DViewer.view.modelVisualization.MeshTools.toIntArray;
+import static protein3DViewer.view.modelVisualization.MeshTools.*;
 
 /**
  * Created by sophiamersmann on 23/01/2017.
@@ -37,7 +34,7 @@ public class RibbonVisualization extends AbstractModelVisualization {
         ribbonMesh.getFaces().addAll(generateFaces());
 
         ribbonMeshView = new MeshView(ribbonMesh);
-        ribbonMeshView.setMaterial(new PhongMaterial(Color.YELLOW));
+        ribbonMeshView.setMaterial(new PhongMaterial(ColorValue.RIBBON.getColor()));
         bottomGroup.getChildren().add(ribbonMeshView);
     }
 
@@ -60,7 +57,7 @@ public class RibbonVisualization extends AbstractModelVisualization {
     /**
      * extract all points of a specific for a triangle mesh
      *
-     * @param points already extracted points
+     * @param points  already extracted points
      * @param residue residue
      * @return points
      */
@@ -78,8 +75,8 @@ public class RibbonVisualization extends AbstractModelVisualization {
     /**
      * extract points of a specific atom for a triangle mesh
      *
-     * @param points already extracted points
-     * @param atom atom
+     * @param points    already extracted points
+     * @param atom      atom
      * @param residueID ID of the residue to which the atom belongs
      * @return points
      */
@@ -111,10 +108,7 @@ public class RibbonVisualization extends AbstractModelVisualization {
             faces.addAll(Arrays.asList(indexCBi, 0, indexCAj, 0, indexCBj, 0));
         }
         return toIntArray(faces);
-}
-
-
-
+    }
 
 
 }

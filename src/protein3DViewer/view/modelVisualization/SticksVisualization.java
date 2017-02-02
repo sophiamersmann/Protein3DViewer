@@ -7,9 +7,9 @@ import protein3DViewer.MySelectionModel;
 import protein3DViewer.model.*;
 import protein3DViewer.view.ColorMode;
 import protein3DViewer.view.ModelView;
-import protein3DViewer.view.bondView.BondView;
 import protein3DViewer.view.atomView.AbstractAtomView;
 import protein3DViewer.view.atomView.AtomViewFactory;
+import protein3DViewer.view.bondView.BondView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -69,7 +69,7 @@ public class SticksVisualization extends AbstractModelVisualization {
                             displayBoundingBox(atomView);
                             AtomLabel atomLabel = createLabel(atomView, atomView.getAtom().getResidue().getName3() + atomView.getAtom().getResidue().getId());
                             boolean labelAlreadySet = false;
-                            for (int atomID: atomView.getAtom().getResidue().getAtoms().keySet()) {
+                            for (int atomID : atomView.getAtom().getResidue().getAtoms().keySet()) {
                                 if (atomViews.get(atomID).getLabel() != null) {
                                     labelAlreadySet = true;
                                     break;
@@ -116,8 +116,17 @@ public class SticksVisualization extends AbstractModelVisualization {
                         }
                     }
                     if (c.wasRemoved()) {
-                        for (AbstractAtomView atomView: c.getRemoved()) {
+                        for (AbstractAtomView atomView : c.getRemoved()) {
                             modelView.getTopPane().getChildren().removeAll(atomView.getBoundingBox(), atomView.getLabel());
+                            for (Connection connection: atomView.getConnections()) {
+                                connectionGroup.getChildren().remove(connection);
+                                modelView.getTopPane().getChildren().remove(connection.getLabel());
+                            }
+                            for (int i = atomView.getConnections().size() - 1; i >= 0; i--) {
+                                Connection connection = atomView.getConnections().get(i);
+                                connection.getStartAtomView().getConnections().remove(connection);
+                                connection.getEndAtomView().getConnections().remove(connection);
+                            }
                         }
                     }
 
@@ -141,7 +150,7 @@ public class SticksVisualization extends AbstractModelVisualization {
      * create label for a specific atom
      *
      * @param atomView atom view for which label is created
-     * @param text text that is displayed from the label
+     * @param text     text that is displayed from the label
      * @return label of atom
      */
     private AtomLabel createLabel(AbstractAtomView atomView, String text) {

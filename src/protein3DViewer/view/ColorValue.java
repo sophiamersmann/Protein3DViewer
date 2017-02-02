@@ -40,17 +40,28 @@ public enum ColorValue {
     @Override
     public String toString() {
         switch (this) {
-            case DEFAULT: return "Default";
-            case RIBBON: return "Ribbon";
-            case HELIX: return "Helix";
-            case SHEET: return "Sheet";
-            case LOOPS: return "Loops";
-            case LARGE_HYDROPHOBIC: return "Large Hydrophobic Amino Acids";
-            case SMALL_HYDROPHOBIC: return "Small Hydrophobic Amino Acids";
-            case POLAR: return "Polar Amino Acids";
-            case POSITIVE_CHARGED: return "Positive Charged Amino Acids";
-            case NEGATIVE_CHARGED: return "Negative Charged Amino Acids";
-            default: return "";
+            case DEFAULT:
+                return "Default";
+            case RIBBON:
+                return "Ribbon";
+            case HELIX:
+                return "Helix";
+            case SHEET:
+                return "Sheet";
+            case LOOPS:
+                return "Loops";
+            case LARGE_HYDROPHOBIC:
+                return "Large Hydrophobic Amino Acids";
+            case SMALL_HYDROPHOBIC:
+                return "Small Hydrophobic Amino Acids";
+            case POLAR:
+                return "Polar Amino Acids";
+            case POSITIVE_CHARGED:
+                return "Positive Charged Amino Acids";
+            case NEGATIVE_CHARGED:
+                return "Negative Charged Amino Acids";
+            default:
+                return "";
         }
     }
 
@@ -58,7 +69,7 @@ public enum ColorValue {
      * reset all colors to its default
      */
     public static void reset() {
-        for (ColorValue colorValue: ColorValue.values()) {
+        for (ColorValue colorValue : ColorValue.values()) {
             colorValue.color = colorValue.defaultColor;
         }
     }
