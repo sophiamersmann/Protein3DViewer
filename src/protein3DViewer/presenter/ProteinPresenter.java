@@ -605,9 +605,6 @@ public class ProteinPresenter {
                 Connection connection = new Connection(atomView1, atomView2);
                 atomView1.getConnections().add(connection);
                 atomView2.getConnections().add(connection);
-//                Line connection = new Line(atomView1.getX(), atomView1.getY(), atomView1.getZ(),
-//                        atomView2.getX(), atomView2.getY(), atomView2.getZ()
-//                );
                 connection.setMaterial(new PhongMaterial(Color.BLACK));
                 sticksVisualization.getConnectionGroup().getChildren().add(connection);
 

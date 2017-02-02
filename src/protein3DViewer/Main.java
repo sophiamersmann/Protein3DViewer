@@ -62,6 +62,7 @@ public class Main extends Application {
             }
         });
 
+        primaryStage.setTitle("Protein 3D Viewer");
         primaryStage.setScene(scene);
         primaryStage.show();
 
