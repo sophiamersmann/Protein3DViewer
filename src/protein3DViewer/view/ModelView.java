@@ -2,6 +2,8 @@ package protein3DViewer.view;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.scene.*;
 import javafx.scene.layout.Pane;
@@ -19,10 +21,7 @@ import protein3DViewer.view.modelVisualization.BoundingBox;
 import protein3DViewer.view.modelVisualization.ModelVisualizationFactory;
 import protein3DViewer.view.modelVisualization.SticksVisualization;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by sophiamersmann on 20/01/2017.
@@ -46,7 +45,7 @@ public class ModelView extends Group {
 
     public ModelView(Model model) {
         this.model = model;
-        stackPane.setPrefSize(1500, 1500);
+//        stackPane.setPrefSize(1500, 1500);
 //        initModelTransformListener();
         init3DView();
         adjustProteinPosition();
@@ -109,13 +108,23 @@ public class ModelView extends Group {
 //    }
 
     private void init3DView() {
-        subScene = new SubScene(bottomGroup, 800, 800, true, SceneAntialiasing.BALANCED);  // TODO: hard coded right now
-        subScene.setFill(Color.LIGHTGREY);
+        subScene = new SubScene(bottomGroup, 1000, 1000, true, SceneAntialiasing.BALANCED);  // TODO: hard coded right now
+//        subScene.setFill(Color.LIGHTGREY);
+        subScene.widthProperty().bind(stackPane.widthProperty());
+        subScene.heightProperty().bind(stackPane.heightProperty());
         camera = new PerspectiveCamera(true);
-//        subScene.widthProperty().bind(bottomPane.widthProperty());
-//        subScene.heightProperty().bind(bottomPane.heightProperty());
-//        camera.translateXProperty().bindBidirectional(bottomPane.prefWidthProperty());
-//        camera.translateYProperty().bindBidirectional(bottomPane.prefHeightProperty());
+//        subScene.widthProperty().addListener(new ChangeListener<Number>() {
+//            @Override
+//            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+//                camera.setTranslateX(0.5 * (double) newValue);
+//            }
+//        });
+//        subScene.heightProperty().addListener(new ChangeListener<Number>() {
+//            @Override
+//            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+//                camera.setTranslateY(0.5 * (double) newValue);
+//            }
+//        });
         camera.setNearClip(0.1);
         camera.setFarClip(Double.MAX_VALUE);
         camera.setTranslateZ(-100);
@@ -134,6 +143,15 @@ public class ModelView extends Group {
         modelVisualizations.get(visualizationMode).getBottomGroup().getChildren().clear();
         if (visualizationMode == VisualizationMode.STICKS) {
             topPane.getChildren().clear();
+            SticksVisualization sticksVisualization = (SticksVisualization) modelVisualizations.get(VisualizationMode.STICKS);
+            sticksVisualization.getAtomViews().values().forEach(abstractAtomView -> abstractAtomView.setSelected(false));
+            sticksVisualization.getAtomViews().values().forEach(abstractAtomView -> abstractAtomView.setShiftSelected(false));
+        }
+    }
+
+    public void clear() {
+        for (VisualizationMode visualizationMode: modelVisualizations.keySet()) {
+            removeVisualization(visualizationMode);
         }
     }
 

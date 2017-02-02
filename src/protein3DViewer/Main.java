@@ -1,6 +1,8 @@
 package protein3DViewer;
 
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -43,8 +45,27 @@ public class Main extends Application {
 
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
         Scene scene = new Scene(borderPane, screen.getWidth(), screen.getHeight());
+        scene.widthProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                borderPane.setPrefWidth((double) newValue);
+                borderPane.setMaxWidth((double) newValue);
+                borderPane.setMinWidth((double) newValue);
+            }
+        });
+        scene.heightProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                borderPane.setPrefHeight((double) newValue);
+                borderPane.setMaxHeight((double) newValue);
+                borderPane.setMinHeight((double) newValue);
+
+            }
+        });
         primaryStage.setScene(scene);
         primaryStage.show();
 
     }
+
+
 }

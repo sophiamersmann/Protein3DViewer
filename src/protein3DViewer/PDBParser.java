@@ -48,7 +48,7 @@ public class PDBParser {
     Map<Integer, String> atomElements = new HashMap<>();
     Map<Integer, Point3D> atomCoordinates = new HashMap<>();
 
-    PDBParser(File pdbFile) {
+    public PDBParser(File pdbFile) {
         try {
             this.pdbFile = pdbFile;
             BufferedReader bfr = new BufferedReader(new FileReader(pdbFile));

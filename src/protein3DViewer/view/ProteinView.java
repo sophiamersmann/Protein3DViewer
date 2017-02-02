@@ -1,15 +1,13 @@
 package protein3DViewer.view;
 
-import com.sun.javafx.sg.prism.NGShape;
-import com.sun.xml.internal.xsom.impl.scd.Iterators;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.*;
 import protein3DViewer.model.Chain;
 import protein3DViewer.model.Protein;
 import protein3DViewer.model.Residue;
@@ -40,6 +38,14 @@ public class ProteinView {
     private MenuItem menuOpen = new MenuItem("Open...");
 
     private Menu menuEdit = new Menu("Edit");
+    private Menu menuColorBy = new Menu("Color by...");
+    private CheckMenuItem menuColorBySingleColor = new CheckMenuItem(ColorMode.UNICOLOR.getDescription());
+    private CheckMenuItem menuColorByAminoAcid = new CheckMenuItem(ColorMode.BY_ATOM_TYPE.getDescription());
+    private CheckMenuItem menuColorBySecondaryStructure = new CheckMenuItem(ColorMode.BY_SECONDARY_STRUCTURE.getDescription());
+    private CheckMenuItem menuColorByProperties = new CheckMenuItem(ColorMode.BY_PROPERTIES.getDescription());
+    private MenuItem menuChangeDefaultColors = new MenuItem("Change Default Colors");
+    private MenuItem menuResetToDefaultColors = new MenuItem("Reset to Default Colors");
+    private MenuItem menuColorSelectedAtoms = new MenuItem("Change Color of Selected Atoms");
 
     private Menu menuView = new Menu("View");
     private Menu menuShow = new Menu("Show");
@@ -49,22 +55,19 @@ public class ProteinView {
     private CheckMenuItem menuVisualizeSticks = new CheckMenuItem(VisualizationMode.STICKS.getDescription());
     private CheckMenuItem menuVisualizeRibbon = new CheckMenuItem(VisualizationMode.RIBBON.getDescription());
     private CheckMenuItem menuVisualizeCartoon = new CheckMenuItem(VisualizationMode.CARTOON.getDescription());
-    private Menu menuColorBy = new Menu("Color by...");
-    private CheckMenuItem menuColorBySingleColor = new CheckMenuItem(ColorMode.UNICOLOR.getDescription());
-    private CheckMenuItem menuColorByAminoAcid = new CheckMenuItem(ColorMode.BY_ATOM_TYPE.getDescription());
-    private CheckMenuItem menuColorBySecondaryStructure = new CheckMenuItem(ColorMode.BY_SECONDARY_STRUCTURE.getDescription());
-    private CheckMenuItem menuColorByProperties = new CheckMenuItem(ColorMode.BY_PROPERTIES.getDescription());
-    private Menu menuAtomSize = new Menu("Atom Size");
-    private MenuItem menuIncreaseAtomSize = new MenuItem("Increase");
-    private MenuItem menuDecreaseAtomSize = new MenuItem("Decrease");
-    private Menu menuBondSize = new Menu("Bond Size");
-    private MenuItem menuIncreaseBondSize = new MenuItem("Increase");
-    private MenuItem menuDecreaseBondSize = new MenuItem("Decrease");
-    private MenuItem menuStatistics = new MenuItem("Statistics");
+//    private Menu menuAtomSize = new Menu("Atom Size");
+//    private MenuItem menuIncreaseAtomSize = new MenuItem("Increase");
+//    private MenuItem menuDecreaseAtomSize = new MenuItem("Decrease");
+//    private Menu menuBondSize = new Menu("Bond Size");
+//    private MenuItem menuIncreaseBondSize = new MenuItem("Increase");
+//    private MenuItem menuDecreaseBondSize = new MenuItem("Decrease");
+    private Menu menuInformation = new Menu("Information about...");
+    private MenuItem menuInformationResidueTypes = new MenuItem("Residue Types");
+    private MenuItem menuInformationSecondaryStructure = new MenuItem("Secondary Structure");
 
     private Menu menuServices = new Menu("Services");
     private MenuItem menuRunBlast = new MenuItem("Run BLAST...");
-    private MenuItem menuShowBlastResults = new MenuItem("Show BLAST results");
+    private MenuItem menuShowBlastResults = new MenuItem("Show BLAST Results");
 
     private ToolBar toolBar = new ToolBar();
     private CheckBox showAtoms = new CheckBox("Show Atoms");
@@ -72,50 +75,92 @@ public class ProteinView {
     private CheckBox visualizeSticks = new CheckBox(VisualizationMode.STICKS.getDescription());
     private CheckBox visualizeRibbon = new CheckBox(VisualizationMode.RIBBON.getDescription());
     private CheckBox visualizeCartoon = new CheckBox(VisualizationMode.CARTOON.getDescription());
-    private Slider atomSizeSlider = new Slider(-0.8, 0.8, 0);
-    private Slider bondSizeSlider = new Slider(-1, 1, 0);
+    private Slider atomSizeSlider = new Slider(-0.5, 20, 0);
+    private Slider bondSizeSlider = new Slider(-0.5, 1, 0);
     private ChoiceBox<ColorMode> chooseColoring = new ChoiceBox<>(FXCollections.observableArrayList(
             ColorMode.UNICOLOR, ColorMode.BY_ATOM_TYPE, ColorMode.BY_SECONDARY_STRUCTURE, ColorMode.BY_PROPERTIES
     ));
-    private PieChart pieChart = new PieChart();
+    private Button calculateDistanceButton = new Button("Calculate Distance");
+
+    private PieChart pieChartResidueTypes = new PieChart();
+    private PieChart pieChartSecondaryStructure = new PieChart();
 
     public ProteinView(BorderPane borderPane, Protein protein) {
         this.protein = protein;
         this.borderPane = borderPane;
-        initPieChart();
+        initPieCharts();
         initViews();
         initMenuBar();
         initToolBar();
         initBindings();
         initCrossLinking();
+        setDefaults();
     }
 
-    private void initPieChart() {
+    public void reset(Protein protein) {
+        modelView.clear();
+        sequenceView.clear();
+        this.protein = protein;
+        initPieCharts();
+        initViews();
+        initCrossLinking();
+        setDefaults();
+    }
+
+    private void initPieCharts() {
         int totalNumberOfResidues = 0;
         Map<String, Integer> numberOfEachResidueType = new HashMap<>();
+        Map<String, Integer> numberOfEachSecondaryStructure = new HashMap<>();
+        numberOfEachSecondaryStructure.put("Helix", 0);
+        numberOfEachSecondaryStructure.put("Sheet", 0);
+        numberOfEachSecondaryStructure.put("Loop", 0);
         for (Chain chain: protein.getModel().getChains().values()) {
             for (Residue residue: chain.getResidues().values()) {
                 if (!numberOfEachResidueType.containsKey(residue.getName3())) {
                     numberOfEachResidueType.put(residue.getName3(), 0);
                 }
                 numberOfEachResidueType.put(residue.getName3(), numberOfEachResidueType.get(residue.getName3()) + 1);
+
+                if (residue.isInHelix()) {
+                    numberOfEachSecondaryStructure.put("Helix", numberOfEachSecondaryStructure.get("Helix") + 1);
+                } else if (residue.isInSheet()) {
+                    numberOfEachSecondaryStructure.put("Sheet", numberOfEachSecondaryStructure.get("Sheet") + 1);
+                } else {
+                    numberOfEachSecondaryStructure.put("Loop", numberOfEachSecondaryStructure.get("Loop") + 1);
+                }
             }
             totalNumberOfResidues += chain.getResidues().size();
         }
 
-        List<PieChart.Data> pieChartDataArray = new ArrayList<>();
+        List<PieChart.Data> pieChartDataArrayResidueType = new ArrayList<>();
         Iterator it = numberOfEachResidueType.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry pair = (Map.Entry) it.next();
             Double percentage = (Integer) pair.getValue() / (double) totalNumberOfResidues;
-            pieChartDataArray.add(new PieChart.Data((String) pair.getKey(), percentage));
+            pieChartDataArrayResidueType.add(new PieChart.Data((String) pair.getKey(), percentage));
             it.remove();
         }
+        pieChartResidueTypes.setData(FXCollections.observableArrayList(pieChartDataArrayResidueType));
+        pieChartResidueTypes.setTitle("Residue Types");
+        pieChartResidueTypes.setMaxHeight(400);
+        pieChartResidueTypes.setMaxWidth(400);
 
-        pieChart.setData(FXCollections.observableArrayList(pieChartDataArray));
-        pieChart.setTitle("Residue Types");
-        pieChart.setMaxHeight(400);  // TODO hard coded right now
-        pieChart.setMaxWidth(400);
+
+
+        List<PieChart.Data> pieChartDataArraySecondaryStructure = new ArrayList<>();
+        Iterator otherIt = numberOfEachSecondaryStructure.entrySet().iterator();
+        while (otherIt.hasNext()) {
+            Map.Entry pair = (Map.Entry) otherIt.next();
+            Double percentage = (Integer) pair.getValue() / (double) totalNumberOfResidues;
+            pieChartDataArraySecondaryStructure.add(new PieChart.Data((String) pair.getKey(), percentage));
+            otherIt.remove();
+        }
+        pieChartSecondaryStructure.setData(FXCollections.observableArrayList(pieChartDataArraySecondaryStructure));
+        pieChartSecondaryStructure.setTitle("Secondary Structure");
+        pieChartSecondaryStructure.setMaxHeight(400);
+        pieChartSecondaryStructure.setMaxWidth(400);
+
+
     }
 
     private void initMenuBar() {
@@ -124,29 +169,46 @@ public class ProteinView {
         menuShow.getItems().addAll(menuShowAtoms, menuShowBonds);
         menuVisualization.getItems().addAll(menuVisualizeSticks, menuVisualizeRibbon, menuVisualizeCartoon);
         menuColorBy.getItems().addAll(menuColorBySingleColor, menuColorByAminoAcid, menuColorBySecondaryStructure, menuColorByProperties);
-        menuAtomSize.getItems().addAll(menuIncreaseAtomSize, menuDecreaseAtomSize);
-        menuBondSize.getItems().addAll(menuIncreaseBondSize, menuDecreaseBondSize);
-        menuView.getItems().addAll(menuShow, menuVisualization, menuStatistics);
+//        menuAtomSize.getItems().addAll(menuIncreaseAtomSize, menuDecreaseAtomSize);
+//        menuBondSize.getItems().addAll(menuIncreaseBondSize, menuDecreaseBondSize);
+        menuInformation.getItems().addAll(menuInformationResidueTypes, menuInformationSecondaryStructure);
+        menuView.getItems().addAll(menuShow, menuVisualization, menuInformation);
 
-        menuEdit.getItems().addAll(menuColorBy, menuAtomSize, menuBondSize);
+        menuEdit.getItems().addAll(menuColorBy,
+                new SeparatorMenuItem(),
+                menuChangeDefaultColors,
+                menuResetToDefaultColors,
+                new SeparatorMenuItem(),
+                menuColorSelectedAtoms
+        );  // menuAtomSize, menuBondSize
 
         menuServices.getItems().addAll(menuRunBlast, menuShowBlastResults);
-
-        menuShowAtoms.setSelected(true);
-        menuShowBonds.setSelected(true);
-        menuVisualizeSticks.setSelected(true);
-        menuColorByAminoAcid.setSelected(true);
-        menuShowBlastResults.setDisable(true);
 
         menuBar.getMenus().addAll(menuFile, menuEdit, menuView, menuServices);
         menuBar.useSystemMenuBarProperty().set(true);
         borderPane.getChildren().add(menuBar);
     }
 
+    private void setDefaults() {
+        menuShowAtoms.setSelected(true);
+        menuShowBonds.setSelected(true);
+        menuVisualizeSticks.setSelected(true);
+        menuColorByAminoAcid.setSelected(true);
+        menuShowBlastResults.setDisable(true);
+        menuColorSelectedAtoms.setDisable(true);
+
+        showAtoms.setSelected(true);
+        showBonds.setSelected(true);
+        visualizeSticks.setSelected(true);
+        chooseColoring.setValue(ColorMode.BY_ATOM_TYPE);
+    }
+
     private void initToolBar() {
         toolBar.setOrientation(Orientation.VERTICAL);
-        toolBar.setPrefWidth(10);  // TODO: hard coded right now
-        toolBar.setMaxWidth(10);
+//        toolBar.setPrefWidth(10);  // TODO: hard coded right now
+//        toolBar.setMaxWidth(10);
+        calculateDistanceButton.setMaxWidth(Double.MAX_VALUE);
+
         toolBar.getItems().addAll(
                 showAtoms,
                 atomSizeSlider,
@@ -160,16 +222,13 @@ public class ProteinView {
                 visualizeCartoon,
                 new Separator(),
                 new Label("Color by..."),
-                chooseColoring
+                chooseColoring,
+                new Separator(),
+                calculateDistanceButton
         );
 
-        showAtoms.setSelected(true);
-        showBonds.setSelected(true);
-        visualizeSticks.setSelected(true);
-        chooseColoring.setValue(ColorMode.BY_ATOM_TYPE);
-
         borderPane.setLeft(toolBar);
-        BorderPane.setMargin(borderPane.getLeft(), new Insets(0, 10, 10, 0));
+//        BorderPane.setMargin(borderPane.getLeft(), new Insets(0, 10, 10, 0));
         BorderPane.setAlignment(borderPane.getLeft(), Pos.TOP_CENTER);
     }
 
@@ -177,13 +236,56 @@ public class ProteinView {
         modelView = new ModelView(protein.getModel());
         modelPresenter = new ModelPresenter(modelView, protein.getModel());
         borderPane.setCenter(modelView);
+//        modelView.getStackPane().setPrefWidth(borderPane.getCenter().getBoundsInLocal().getWidth());
+//        modelView.getStackPane().setPrefHeight(borderPane.getCenter().getBoundsInLocal().getHeight());
+//        borderPane.getCenter().boundsInLocalProperty().addListener(new ChangeListener<Bounds>() {
+//            @Override
+//            public void changed(ObservableValue<? extends Bounds> observable, Bounds oldValue, Bounds newValue) {
+//                System.out.println("new: " + newValue.getWidth() + " " + newValue.getHeight());
+//                modelView.getStackPane().setPrefWidth(newValue.getWidth());
+//                modelView.getStackPane().setPrefHeight(newValue.getHeight());
+//            }
+//        });
         BorderPane.setAlignment(borderPane.getCenter(), Pos.CENTER);
 
         sequenceView = new SequenceView(protein.getSeqResRecord(), protein.getSecondaryStructure());
-        sequencePresenter = new SequencePresenter(sequenceView, protein.getSeqResRecord());
+        sequencePresenter = new SequencePresenter(modelPresenter, sequenceView, protein.getSeqResRecord());
         borderPane.setTop(sequenceView);
-        BorderPane.setMargin(borderPane.getTop(), new Insets(10, 0, 10, 0));
-        BorderPane.setAlignment(borderPane.getTop(), Pos.CENTER);
+//        BorderPane.setMargin(borderPane.getTop(), new Insets(20, 10, 20, 10));
+        BorderPane.setAlignment(borderPane.getTop(), Pos.CENTER_LEFT);
+
+//        modelView.getBottomPane().setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY,
+//                BorderWidths.DEFAULT)));
+
+        modelView.getStackPane().setPrefWidth(borderPane.getWidth());
+        modelView.getStackPane().setMaxWidth(borderPane.getWidth());
+        modelView.getStackPane().setMinWidth(borderPane.getWidth());
+        sequenceView.getScrollPane().setPrefWidth(borderPane.getWidth());
+        sequenceView.getScrollPane().setMaxWidth(borderPane.getWidth());
+        sequenceView.getScrollPane().setMinWidth(borderPane.getWidth());
+        borderPane.widthProperty().addListener(new ChangeListener<Number>() {  // TODO: should be center
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                modelView.getStackPane().setPrefWidth((double) newValue);
+                modelView.getStackPane().setMaxWidth((double) newValue);
+                modelView.getStackPane().setMinWidth((double) newValue);
+                sequenceView.getScrollPane().setPrefWidth((double) newValue);
+                sequenceView.getScrollPane().setMaxWidth((double) newValue);
+                sequenceView.getScrollPane().setMinWidth((double) newValue);
+            }
+        });
+        modelView.getStackPane().setPrefHeight(borderPane.getHeight());
+        modelView.getStackPane().setMinHeight(borderPane.getHeight());
+        modelView.getStackPane().setMaxHeight(borderPane.getHeight());
+        borderPane.heightProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+                modelView.getStackPane().setPrefHeight((double) newValue);
+                modelView.getStackPane().setMinHeight((double) newValue);
+                modelView.getStackPane().setMaxHeight((double) newValue);
+            }
+        });
+
     }
 
     private void initBindings() {
@@ -295,29 +397,29 @@ public class ProteinView {
         return menuColorByProperties;
     }
 
-    public Menu getMenuAtomSize() {
-        return menuAtomSize;
-    }
-
-    public MenuItem getMenuIncreaseAtomSize() {
-        return menuIncreaseAtomSize;
-    }
-
-    public MenuItem getMenuDecreaseAtomSize() {
-        return menuDecreaseAtomSize;
-    }
-
-    public Menu getMenuBondSize() {
-        return menuBondSize;
-    }
-
-    public MenuItem getMenuIncreaseBondSize() {
-        return menuIncreaseBondSize;
-    }
-
-    public MenuItem getMenuDecreaseBondSize() {
-        return menuDecreaseBondSize;
-    }
+//    public Menu getMenuAtomSize() {
+//        return menuAtomSize;
+//    }
+//
+//    public MenuItem getMenuIncreaseAtomSize() {
+//        return menuIncreaseAtomSize;
+//    }
+//
+//    public MenuItem getMenuDecreaseAtomSize() {
+//        return menuDecreaseAtomSize;
+//    }
+//
+//    public Menu getMenuBondSize() {
+//        return menuBondSize;
+//    }
+//
+//    public MenuItem getMenuIncreaseBondSize() {
+//        return menuIncreaseBondSize;
+//    }
+//
+//    public MenuItem getMenuDecreaseBondSize() {
+//        return menuDecreaseBondSize;
+//    }
 
     public ToolBar getToolBar() {
         return toolBar;
@@ -363,11 +465,35 @@ public class ProteinView {
         return menuShowBlastResults;
     }
 
-    public PieChart getPieChart() {
-        return pieChart;
+    public PieChart getPieChartResidueTypes() {
+        return pieChartResidueTypes;
     }
 
-    public MenuItem getMenuStatistics() {
-        return menuStatistics;
+    public MenuItem getMenuInformationResidueTypes() {
+        return menuInformationResidueTypes;
+    }
+
+    public MenuItem getMenuColorSelectedAtoms() {
+        return menuColorSelectedAtoms;
+    }
+
+    public MenuItem getMenuChangeDefaultColors() {
+        return menuChangeDefaultColors;
+    }
+
+    public MenuItem getMenuResetToDefaultColors() {
+        return menuResetToDefaultColors;
+    }
+
+    public MenuItem getMenuInformationSecondaryStructure() {
+        return menuInformationSecondaryStructure;
+    }
+
+    public PieChart getPieChartSecondaryStructure() {
+        return pieChartSecondaryStructure;
+    }
+
+    public Button getCalculateDistanceButton() {
+        return calculateDistanceButton;
     }
 }

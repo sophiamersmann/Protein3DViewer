@@ -57,6 +57,8 @@ public class BlastSearchResultParser {
             }
             i++;
         }
+
+
     }
 
     public String getFirstAlignment() {

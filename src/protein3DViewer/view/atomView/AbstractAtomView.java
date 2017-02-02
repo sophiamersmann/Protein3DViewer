@@ -4,35 +4,31 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.Group;
-import javafx.scene.effect.Bloom;
-import javafx.scene.effect.Effect;
-import javafx.scene.effect.Glow;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
 import protein3DViewer.model.Atom;
 import protein3DViewer.view.ColorMode;
+import protein3DViewer.view.ColorValue;
+import protein3DViewer.view.modelVisualization.AtomLabel;
 import protein3DViewer.view.modelVisualization.BoundingBox;
-import sun.jvm.hotspot.opto.PhiNode;
 
 /**
  * Created by sophiamersmann on 20/01/2017.
  */
 public abstract class AbstractAtomView extends Group {
 
-    public final static Color DEFAULT_COLOR = Color.GREY;
-
-    public final static Color HELIX_COLOR = Color.GREEN;
-    public final static Color SHEET_COLOR = Color.YELLOW;
-
-    public final static Color SMALL_HYDROPHOBIC_COLOR = Color.SALMON;
-    public final static Color LARGE_HYDROPHOBIC_COLOR = Color.LIGHTBLUE;
-    public final static Color POLAR_COLOR = Color.PALEGREEN;
-    public final static Color POS_CHARGED_COLOR = Color.ORANGERED;
-    public final static Color NEG_CHARGED_COLOR = Color.NAVAJOWHITE;
+//    public final static Color DEFAULT_COLOR = Color.GREY;
+//
+//    public final static Color HELIX_COLOR = Color.GREEN;
+//    public final static Color SHEET_COLOR = Color.ORANGE;
+//
+//    public final static Color SMALL_HYDROPHOBIC_COLOR = Color.SALMON;
+//    public final static Color LARGE_HYDROPHOBIC_COLOR = Color.LIGHTBLUE;
+//    public final static Color POLAR_COLOR = Color.PALEGREEN;
+//    public final static Color POS_CHARGED_COLOR = Color.ORANGERED;
+//    public final static Color NEG_CHARGED_COLOR = Color.NAVAJOWHITE;
 
     Atom atom;
     Sphere shape;
@@ -44,11 +40,13 @@ public abstract class AbstractAtomView extends Group {
 
     BooleanProperty selected = new SimpleBooleanProperty();
     BooleanProperty shiftSelected = new SimpleBooleanProperty();
+    BooleanProperty altSelected = new SimpleBooleanProperty();
 
     Color color;
     Color prevColor;
 
     BoundingBox boundingBox;
+    AtomLabel label;
 
     public AbstractAtomView(Atom atom) {
         this.atom = atom;
@@ -130,13 +128,19 @@ public abstract class AbstractAtomView extends Group {
         shape.setRadius(shape.getRadius() + factor);
     }
 
+    public void changeSize(Double factor) {
+        setScaleX(getScaleX() + factor);
+        setScaleY(getScaleY() + factor);
+        setScaleZ(getScaleZ() + factor);
+    }
+
     public Color getColor(ColorMode mode) {
         switch (mode) {
-            case UNICOLOR: return DEFAULT_COLOR;
+            case UNICOLOR: return ColorValue.DEFAULT.getColor();
             case BY_ATOM_TYPE: return getAminoAcidColor();
             case BY_SECONDARY_STRUCTURE: return getSecondaryStructureColor();
             case BY_PROPERTIES: return getPropertyColor();
-            default: return DEFAULT_COLOR;
+            default: return ColorValue.DEFAULT.getColor();
         }
     }
 
@@ -148,29 +152,33 @@ public abstract class AbstractAtomView extends Group {
         } else if (this instanceof OxygenView) {
             return OxygenView.COLOR;
         } else {
-            return DEFAULT_COLOR;
+            return ColorValue.DEFAULT.getColor();
         }
     }
 
     private Color getSecondaryStructureColor() {
         if (atom.getResidue().isInHelix()) {
-            return HELIX_COLOR;
+            return ColorValue.HELIX.getColor();
         } else if (atom.getResidue().isInSheet()) {
-            return SHEET_COLOR;
+            return ColorValue.SHEET.getColor();
         } else {
-            return DEFAULT_COLOR;
+            return ColorValue.LOOPS.getColor();
         }
     }
 
     private Color getPropertyColor() {
         switch (AminoAcidGroup.aminoAcidGroupOf(atom.getResidue().getName())) {
-            case SMALL_HYDROPHOBIC: return SMALL_HYDROPHOBIC_COLOR;
-            case LARGE_HYDROPHOBIC: return LARGE_HYDROPHOBIC_COLOR;
-            case POLAR: return POLAR_COLOR;
-            case POS_CHARGED: return POS_CHARGED_COLOR;
-            case NEG_CHARGED: return NEG_CHARGED_COLOR;
-            default: return DEFAULT_COLOR;
+            case SMALL_HYDROPHOBIC: return ColorValue.SMALL_HYDROPHOBIC.getColor();
+            case LARGE_HYDROPHOBIC: return ColorValue.LARGE_HYDROPHOBIC.getColor();
+            case POLAR: return ColorValue.POLAR.getColor();
+            case POS_CHARGED: return ColorValue.POSITIVE_CHARGED.getColor();
+            case NEG_CHARGED: return ColorValue.NEGATIVE_CHARGED.getColor();
+            default: return ColorValue.DEFAULT.getColor();
         }
+    }
+
+    public double getRadius() {
+        return shape.getRadius();
     }
 
     public BoundingBox getBoundingBox() {
@@ -243,6 +251,26 @@ public abstract class AbstractAtomView extends Group {
 
     public void setShiftSelected(boolean shiftSelected) {
         this.shiftSelected.set(shiftSelected);
+    }
+
+    public AtomLabel getLabel() {
+        return label;
+    }
+
+    public void setLabel(AtomLabel label) {
+        this.label = label;
+    }
+
+    public boolean isAltSelected() {
+        return altSelected.get();
+    }
+
+    public BooleanProperty altSelectedProperty() {
+        return altSelected;
+    }
+
+    public void setAltSelected(boolean altSelected) {
+        this.altSelected.set(altSelected);
     }
 
     @Override

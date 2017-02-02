@@ -9,8 +9,11 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import protein3DViewer.MySelectionModel;
 import protein3DViewer.model.SeqResRecord;
+import protein3DViewer.view.ColorMode;
 import protein3DViewer.view.SelectableLabel;
 import protein3DViewer.view.SequenceView;
+import protein3DViewer.view.VisualizationMode;
+import protein3DViewer.view.modelVisualization.SticksVisualization;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +23,8 @@ import java.util.List;
  */
 public class SequencePresenter {
 
+    private ModelPresenter modelPresenter;
+
     private SeqResRecord seqResRecord;
     private SequenceView sequenceView;
 
@@ -28,7 +33,8 @@ public class SequencePresenter {
 //
 //    private MySelectionModel<SelectableLabel> selectionModelAnnotationSeq;
 
-    public SequencePresenter(SequenceView sequenceView, SeqResRecord seqResRecord) {
+    public SequencePresenter(ModelPresenter modelPresenter, SequenceView sequenceView, SeqResRecord seqResRecord) {
+        this.modelPresenter = modelPresenter;
         this.sequenceView = sequenceView;
         this.seqResRecord = seqResRecord;
         setUpResidueViews();
@@ -58,6 +64,9 @@ public class SequencePresenter {
                     label.setShiftSelected(!label.isShiftSelected());
                 } else {
                     label.setSelected(!label.isSelected());
+                    int atomID = (int) label.getResidue().getAtoms().keySet().toArray()[0];
+                    SticksVisualization sticksVis = (SticksVisualization) modelPresenter.getModelView().getModelVisualization(VisualizationMode.STICKS);
+                    modelPresenter.selectAllAtomsOfResidue(sticksVis.getAtomViews().get(atomID));
                 }
             }
         });
@@ -84,9 +93,5 @@ public class SequencePresenter {
             }
         });
     }
-
-
-
-
 
 }

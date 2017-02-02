@@ -5,6 +5,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
+import javafx.scene.control.Label;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.transform.Rotate;
@@ -14,6 +16,7 @@ import protein3DViewer.model.Model;
 import protein3DViewer.view.ModelView;
 import protein3DViewer.view.VisualizationMode;
 import protein3DViewer.view.atomView.AbstractAtomView;
+import protein3DViewer.view.modelVisualization.AtomLabel;
 import protein3DViewer.view.modelVisualization.SticksVisualization;
 
 import java.util.ArrayList;
@@ -41,6 +44,24 @@ public class ModelPresenter {
 
 
     private void setUpPane() {
+
+        modelView.getStackPane().setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                event.consume();
+                if (event.getButton() == MouseButton.SECONDARY) {
+                    if (modelView.getModelVisualizations().containsKey(VisualizationMode.STICKS)) {
+                        SticksVisualization sticksVisualization = (SticksVisualization) modelView.getModelVisualization(VisualizationMode.STICKS);
+                        sticksVisualization.clearSelection();
+                    }
+//                    atomViews.forEach(atomView -> atomView.setSelected(false));
+//                    atomViews.forEach(atomView -> atomView.setShiftSelected(false));
+//                    atomViews.forEach(atomView -> atomView.setAltSelected(false));
+                    modelView.getTopPane().getChildren().clear();
+                }
+
+            }
+        });
 
         // TODO: zooming
         modelView.getStackPane().setOnScroll(new EventHandler<ScrollEvent>() {
@@ -106,22 +127,47 @@ public class ModelPresenter {
 
     }
 
+    public void selectAllAtomsOfResidue(AbstractAtomView atomView) {
+        SticksVisualization sticksVisualization = (SticksVisualization) modelView.getModelVisualization(VisualizationMode.STICKS);
+        for (int atomID: atomView.getAtom().getResidue().getAtoms().keySet()) {
+            AbstractAtomView view = sticksVisualization.getAtomViews().get(atomID);
+            view.setShiftSelected(!view.isShiftSelected());
+        }
+    }
+
 
     private void setUpAtomView(AbstractAtomView atomView) {
 
+//        atomView.setOnMouseEntered(new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event) {
+//                event.consume();
+//                AtomLabel label = new AtomLabel(atomView, modelView.getBottomPane(), modelView.getBottomGroup().worldTransformProperty());
+//                atomView.setLabel(label);
+//                modelView.getTopPane().getChildren().add(label);
+//            }
+//        });
+//
+//        atomView.setOnMouseExited(new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event) {
+//                event.consume();
+//                modelView.getTopPane().getChildren().remove(atomView.getLabel());
+//            }
+//        });
+
+        // TODO ALT distance
         atomView.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
                 event.consume();
                 if (event.isShiftDown()) {
                     atomView.setShiftSelected(!atomView.isShiftSelected());
+                } else if (event.isAltDown()) {
+                    atomView.setAltSelected(!atomView.isAltSelected());
                 } else {
-                    SticksVisualization sticksVisualization = (SticksVisualization) modelView.getModelVisualization(VisualizationMode.STICKS);
                     atomView.setSelected(!atomView.isSelected());
-                    for (int atomID: atomView.getAtom().getResidue().getAtoms().keySet()) {
-                        AbstractAtomView view = sticksVisualization.getAtomViews().get(atomID);
-                        view.setShiftSelected(!view.isShiftSelected());
-                    }
+                    selectAllAtomsOfResidue(atomView);
                 }
             }
         });
@@ -133,7 +179,8 @@ public class ModelPresenter {
                 if (newValue) {
                     sticksVisualization.getSelectionModel().clearAndSelect(atomViews.indexOf(atomView));
                 } else {
-                    sticksVisualization.getSelectionModel().clearSelection(atomViews.indexOf(atomView)); // TODO
+//                    sticksVisualization.getSelectionModel().clearSelection(atomViews.indexOf(atomView)); // TODO
+                    sticksVisualization.getSelectionModel().clearSelection();
                 }
 
             }
@@ -150,5 +197,21 @@ public class ModelPresenter {
                 }
             }
         });
+
+        atomView.altSelectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                SticksVisualization sticksVisualization = (SticksVisualization) modelView.getModelVisualization(VisualizationMode.STICKS);
+                if (newValue) {
+                    sticksVisualization.getDistanceSelectionModel().select(atomViews.indexOf(atomView));
+                } else {
+                    sticksVisualization.getDistanceSelectionModel().clearSelection(atomViews.indexOf(atomView));
+                }
+            }
+        });
+    }
+
+    public ModelView getModelView() {
+        return modelView;
     }
 }

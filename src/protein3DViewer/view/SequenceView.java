@@ -1,15 +1,13 @@
 package protein3DViewer.view;
 
 import javafx.collections.ListChangeListener;
-import javafx.concurrent.WorkerStateEvent;
-import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
-import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import protein3DViewer.BlastSearchResultParser;
 import protein3DViewer.BlastService;
 import protein3DViewer.MySelectionModel;
 import protein3DViewer.model.Chain;
@@ -36,6 +34,7 @@ public class SequenceView extends Group {
     private Map<Integer, SelectableLabel> residueViews = new HashMap<>();
     private List<SelectableLabel> secondaryStructureAnnotations = new ArrayList<>();
 
+    private ScrollPane scrollPane = new ScrollPane();
     private HBox sequenceBox = new HBox();
 
     private MySelectionModel<SelectableLabel> selectionModelResidueSeq;
@@ -46,7 +45,15 @@ public class SequenceView extends Group {
         this.secondaryStructure = secondaryStructures;
         initTextViews();
         initSelectionModels();
-        getChildren().addAll(sequenceBox);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPannable(true);
+        scrollPane.setContent(sequenceBox);
+        sequenceBox.setAlignment(Pos.CENTER);
+        HBox.setMargin(sequenceBox, new Insets(10, 0, 10, 0));
+        getChildren().add(scrollPane);
     }
 
     private void initSelectionModels() {
@@ -58,12 +65,14 @@ public class SequenceView extends Group {
                 while (c.next()) {
                     if (c.wasAdded()) {
                         for (SelectableLabel label: c.getAddedSubList()) {
-                            label.setTextFill(Color.RED);
+//                            label.setTextFill(Color.RED);
+                            label.setTextPaint(Color.RED);
                         }
                     }
                     if (c.wasRemoved()) {
                         for (SelectableLabel label: c.getRemoved()) {
-                            label.setTextFill(Color.BLACK);
+//                            label.setTextFill(Color.BLACK);
+                            label.resetTextPaint();
                         }
                     }
                 }
@@ -78,12 +87,14 @@ public class SequenceView extends Group {
                 while (c.next()) {
                     if (c.wasAdded()) {
                         for (SelectableLabel label: c.getAddedSubList()) {
-                            label.setTextFill(Color.RED);
+//                            label.setTextFill(Color.RED);
+                            label.setTextPaint(Color.RED);
                         }
                     }
                     if (c.wasRemoved()) {
                         for (SelectableLabel label: c.getRemoved()) {
-                            label.setTextFill(Color.BLACK);
+//                            label.setTextFill(Color.BLACK);
+                            label.resetTextPaint();
                         }
                     }
                 }
@@ -91,7 +102,7 @@ public class SequenceView extends Group {
         });
     }
 
-    private void initTextViews() {
+    public void initTextViews() {
         for (Chain chain : seqResRecord.getChains().values()) {
             for (Residue residue : chain.getResidues().values()) {
                 SelectableLabel resLabel = new SelectableLabel(residue, residue.getName().toString());
@@ -100,8 +111,10 @@ public class SequenceView extends Group {
                 SelectableLabel secStrLabel = new SelectableLabel(residue, " ");
                 if (residue.isInHelix()) {
                     secStrLabel = new SelectableLabel(residue, "H");
+                    secStrLabel.setTextPaint(ColorValue.HELIX.getColor());
                 } else if (residue.isInSheet()) {
                     secStrLabel = new SelectableLabel(residue, "E");
+                    secStrLabel.setTextPaint(ColorValue.SHEET.getColor());
                 }
                 secondaryStructureAnnotations.add(secStrLabel);
 
@@ -113,6 +126,20 @@ public class SequenceView extends Group {
                 sequenceBox.getChildren().add(box);
             }
         }
+    }
+
+    public void changeColor() {
+        for (SelectableLabel label: secondaryStructureAnnotations) {
+            if (label.getResidue().isInHelix()) {
+                label.setTextPaint(ColorValue.HELIX.getColor());
+            } else if (label.getResidue().isInSheet()) {
+                label.setTextPaint(ColorValue.SHEET.getColor());
+            }
+        }
+    }
+
+    public void clear() {
+        getChildren().clear();  // TODO jump
     }
 
     public Map<Integer, SelectableLabel> getResidueViews() {
@@ -129,5 +156,13 @@ public class SequenceView extends Group {
 
     public MySelectionModel<SelectableLabel> getSelectionModelAnnotationSeq() {
         return selectionModelAnnotationSeq;
+    }
+
+    public HBox getSequenceBox() {
+        return sequenceBox;
+    }
+
+    public ScrollPane getScrollPane() {
+        return scrollPane;
     }
 }

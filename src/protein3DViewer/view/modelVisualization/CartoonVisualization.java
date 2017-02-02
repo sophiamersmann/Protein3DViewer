@@ -2,14 +2,13 @@ package protein3DViewer.view.modelVisualization;
 
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Cylinder;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import protein3DViewer.model.*;
+import protein3DViewer.view.ColorValue;
 import protein3DViewer.view.ModelView;
-import protein3DViewer.view.atomView.AbstractAtomView;
 import protein3DViewer.view.bondView.Line;
 
 import java.util.*;
@@ -30,7 +29,7 @@ public class CartoonVisualization extends AbstractModelVisualization {
 
     private Group helixGroup;
     private Group strandGroup;
-    private Group connectionGroup;
+    private Group loopGroup;
 
     private Map<Integer, Map<AtomName, Integer>> mapResIdToAtomToIndex;
 
@@ -42,8 +41,8 @@ public class CartoonVisualization extends AbstractModelVisualization {
     void createBottomGroup() {
         createHelixViews();
         createStrandViews();
-        createConnections();
-        bottomGroup.getChildren().addAll(helixGroup, strandGroup, connectionGroup);
+        createLoops();
+        bottomGroup.getChildren().addAll(helixGroup, strandGroup, loopGroup);
     }
 
     private void createHelixViews() {  // TODO use line
@@ -74,7 +73,7 @@ public class CartoonVisualization extends AbstractModelVisualization {
             cylinder.setRotate(-angle);
             cylinder.setHeight(direction.magnitude());
             cylinder.setRadius(1);
-            cylinder.setMaterial(new PhongMaterial(AbstractAtomView.HELIX_COLOR));
+            cylinder.setMaterial(new PhongMaterial(ColorValue.HELIX.getColor()));
             helices.add(cylinder);
             helixGroup.getChildren().add(cylinder);
         }
@@ -109,7 +108,7 @@ public class CartoonVisualization extends AbstractModelVisualization {
 //                strandMesh.getFaceSmoothingGroups().addAll(smoothingGroups);
                 mapResIdToAtomToIndex.clear();
                 MeshView strandMeshView = new MeshView(strandMesh);
-                strandMeshView.setMaterial(new PhongMaterial(Color.YELLOW));
+                strandMeshView.setMaterial(new PhongMaterial(ColorValue.SHEET.getColor()));
                 strands.add(strandMeshView);
                 strandGroup.getChildren().add(strandMeshView);
             }
@@ -186,17 +185,17 @@ public class CartoonVisualization extends AbstractModelVisualization {
         return pseudoAtom;
     }
 
-    private void createConnections() {
+    private void createLoops() {
         loops = new ArrayList<>();
-        connectionGroup = new Group();
+        loopGroup = new Group();
         for (Chain chain: model.getChains().values()) {
             List<Integer> residueIDs = new ArrayList<>(chain.getResidues().keySet());
             Collections.sort(residueIDs);
             for (int i = 0; i < residueIDs.size() - 1; i++) {
                 Residue currRes = chain.getResidues().get(residueIDs.get(i));
                 Residue nextRes = chain.getResidues().get(residueIDs.get(i+1));
-                if (!currRes.isInHelix() && !currRes.isInSheet() || !nextRes.isInHelix() && !nextRes.isInSheet()) {
-                    Line connection = new Line(
+                if (!(currRes.isInHelix() || currRes.isInSheet()) || !(nextRes.isInHelix() || nextRes.isInSheet())) {
+                    Line loop = new Line(
                             currRes.getAtom(AtomName.CARBON_ALPHA).getX(),
                             currRes.getAtom(AtomName.CARBON_ALPHA).getY(),
                             currRes.getAtom(AtomName.CARBON_ALPHA).getZ(),
@@ -204,9 +203,10 @@ public class CartoonVisualization extends AbstractModelVisualization {
                             nextRes.getAtom(AtomName.CARBON_ALPHA).getY(),
                             nextRes.getAtom(AtomName.CARBON_ALPHA).getZ()
                     );
-                    connection.setRadius(0.25);
-                    loops.add(connection);
-                    connectionGroup.getChildren().addAll(connection);
+                    loop.setMaterial(new PhongMaterial(ColorValue.LOOPS.getColor()));
+                    loop.setRadius(0.25);
+                    loops.add(loop);
+                    loopGroup.getChildren().addAll(loop);
                 }
             }
         }
