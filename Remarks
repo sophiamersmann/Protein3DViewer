@@ -1,0 +1,49 @@
+Concluding Project Remarks (6th Feb)
+
+The concluding remarks are based on the following three bonus aspects mentioned in the description of the project:
+
+- Completeness and Functionality
+
+    Plus
+    + Ribbon and Cartoon View are okay
+    + distance can be calculated between two AAs
+    + colors can be changes, e.g. for all selected ones
+    + 3 letter code of selected AA is presented
+    + multiple AAs can be selected
+    + multiple BLAST searches possible
+    + BLAST result is parsed and processed
+
+    Minus
+    - no BLAST progress reported
+
+    3 Bonus Points
+
+- Appropriate use of JavaFX-Techniques
+
+    PLUS
+    + Slider/Button-logic: Sliders/Buttons are only enabled for Sticks Model
+    + BoundingBoxes with "WorldTransformProperty"
+
+     Minus
+     - non appropriate use of SelectionModel
+         -> SelectionModel on the side of the View
+         -> two SelectionsModels instead of one
+
+    2 Bonus Points
+
+- Readability and Structure of your code
+
+    PLUS
+    + good package structure
+    + good code separation into different classes
+    + use of JavaDocs
+    + good readability
+
+    MINUS
+    - no ObserverPattern between Model and View
+
+    2 BONUS POINTS
+
+-----
+
+    In total: 7 BONUS POINTS
